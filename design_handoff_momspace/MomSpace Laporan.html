@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MomSpace · Laporan Kondisi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800;900&family=Quicksand:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; height: 100%; }
+  body {
+    background: #F6EFEA;
+    font-family: 'Quicksand', system-ui, -apple-system, sans-serif;
+    color: #333727;
+    -webkit-font-smoothing: antialiased;
+  }
+  .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="ios-frame.jsx"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="nav-icons.jsx"></script>
+<script type="text/babel" src="navbars.jsx"></script>
+<script type="text/babel" src="home-map.jsx"></script>
+<script type="text/babel" src="laporan-screen.jsx"></script>
+
+<script type="text/babel" data-presets="env,react">
+const { useState } = React;
+
+const DEFAULTS = /*EDITMODE-BEGIN*/{
+  "focusVariant": "filled"
+}/*EDITMODE-END*/;
+
+function Phone({ variant }) {
+  return (
+    <IOSDevice width={380} height={820}>
+      <LaporanScreen variant={variant} />
+    </IOSDevice>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Brand header
+// ─────────────────────────────────────────────────────────────
+function BrandHeader() {
+  return (
+    <div style={{ width: 720, padding: '0 0 8px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
+        <div style={{
+          width: 44, height: 44, borderRadius: 14,
+          background: 'linear-gradient(140deg, #E8A598, #F2C6B8)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          color: '#fff', fontWeight: 900, fontSize: 20, fontFamily: 'Nunito',
+          boxShadow: '0 8px 18px rgba(232,165,152,0.4)',
+        }}>M</div>
+        <div>
+          <div style={{ fontSize: 28, fontWeight: 900, letterSpacing: -0.5, fontFamily: 'Nunito' }}>
+            MomSpace · Laporan Kondisi
+          </div>
+          <div className="mono" style={{ fontSize: 12, color: '#8A7268', marginTop: 2 }}>
+            Crowdsource form · empty → filled → success · iPhone
+          </div>
+        </div>
+      </div>
+      <div style={{
+        fontSize: 14.5, color: '#5C5347', lineHeight: 1.55,
+        maxWidth: 680, fontWeight: 500,
+      }}>
+        Submission flow for the room-condition crowdsourcing system. Users tap
+        positive / negative chips, optionally attach a photo and notes, and earn
+        +10 poin kontribusi on submit (auto-timestamped in Firestore).
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Component sheet — chip + button states
+// ─────────────────────────────────────────────────────────────
+function ComponentSheet() {
+  return (
+    <div style={{
+      width: 760, padding: 32, background: '#FFFDFB',
+      borderRadius: 24, border: '1px solid rgba(60,40,30,0.06)',
+    }}>
+      <div className="mono" style={{
+        fontSize: 11, color: '#A89991', textTransform: 'uppercase',
+        letterSpacing: 1.4, marginBottom: 6,
+      }}>03 · COMPONENT STATES</div>
+      <div style={{ fontSize: 22, fontWeight: 800, marginBottom: 22, fontFamily: 'Nunito' }}>
+        Condition chip &amp; submit button
+      </div>
+
+      {/* Chip states */}
+      <div className="mono" style={{
+        fontSize: 11, color: '#A89991', textTransform: 'uppercase',
+        letterSpacing: 1.4, marginBottom: 10,
+      }}>Condition chip</div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
+        <ChipSpec
+          title="Unselected"
+          sub="State default"
+          desc="Outlined gray. The user has not chosen this condition.">
+          <ConditionChip label="Bersih" tone="positive" selected={false} />
+        </ChipSpec>
+        <ChipSpec
+          title="Selected · Positive"
+          sub="Kondisi baik"
+          desc="Sage-tinted background, sage check icon. Used for facilities that are working / present.">
+          <ConditionChip label="Bersih" tone="positive" selected={true} />
+        </ChipSpec>
+        <ChipSpec
+          title="Selected · Negative"
+          sub="Kondisi buruk"
+          desc="Warm rose-warning tint, × icon. Reports broken or missing facilities — warning, not danger-red.">
+          <ConditionChip label="Kulkas mati" tone="negative" selected={true} />
+        </ChipSpec>
+      </div>
+
+      {/* Button states */}
+      <div className="mono" style={{
+        marginTop: 24, fontSize: 11, color: '#A89991', textTransform: 'uppercase',
+        letterSpacing: 1.4, marginBottom: 10,
+      }}>Submit button</div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+        <ChipSpec
+          title="Disabled"
+          sub="No condition picked"
+          desc="Gray fill, no shadow. Form must have ≥1 chip selected before enabling.">
+          <div style={{ width: 220 }}><SubmitButton disabled /></div>
+        </ChipSpec>
+        <ChipSpec
+          title="Active · Ready"
+          sub="Siap kirim"
+          desc="Rose gradient with rose shadow. Plane icon, full-width 52 px tall, 26 r corners.">
+          <div style={{ width: 220 }}><SubmitButton /></div>
+        </ChipSpec>
+      </div>
+
+      {/* Color tokens */}
+      <div className="mono" style={{
+        marginTop: 24, fontSize: 11, color: '#A89991', textTransform: 'uppercase',
+        letterSpacing: 1.4, marginBottom: 10,
+      }}>Tokens</div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+        {[
+          ['#8FAF8F', 'Positive · Sage'],
+          ['#C97A6E', 'Negative · Warning rose'],
+          ['#E8A598', 'Primary · Rose'],
+          ['#FBEEEA', 'Rose tint'],
+          ['#FBF4ED', 'Surface · Sand'],
+          ['#E6DCD4', 'Disabled fill'],
+        ].map(([hex, n]) => (
+          <div key={hex} style={{
+            display: 'flex', alignItems: 'center', gap: 10,
+            padding: '8px 12px 8px 8px', background: '#F7EFE8', borderRadius: 99,
+          }}>
+            <div style={{
+              width: 20, height: 20, borderRadius: 99, background: hex,
+              border: '1px solid rgba(60,40,30,0.08)',
+            }} />
+            <div style={{ fontWeight: 700, fontSize: 12, fontFamily: 'Nunito' }}>{n}</div>
+            <div className="mono" style={{ fontSize: 10.5, color: '#A89991' }}>{hex}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ChipSpec({ title, sub, desc, children }) {
+  return (
+    <div style={{
+      padding: 16, borderRadius: 16, background: '#FBF4ED',
+      border: '1px solid rgba(60,40,30,0.05)',
+    }}>
+      <div style={{
+        minHeight: 84, display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: 'radial-gradient(ellipse at center, #F4E8DA 0%, #FBF4ED 70%)',
+        borderRadius: 12, padding: 14, marginBottom: 12,
+      }}>{children}</div>
+      <div style={{
+        fontFamily: 'Nunito', fontWeight: 800, fontSize: 14, color: '#333727',
+      }}>{title}</div>
+      <div style={{ fontSize: 12, color: '#5C5347', marginTop: 1 }}>{sub}</div>
+      <div style={{ fontSize: 11.5, color: '#7C7062', marginTop: 8, lineHeight: 1.45 }}>{desc}</div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Flow diagram
+// ─────────────────────────────────────────────────────────────
+function FlowCard() {
+  const steps = [
+    { n: '1', t: 'Empty',   d: 'Form opens. All chips outlined, photo dashed, notes blank.' },
+    { n: '2', t: 'Filled',  d: 'User taps chips, attaches photo, writes note. Submit enables.' },
+    { n: '3', t: 'Submit',  d: 'POST to Firestore. Auto-timestamp + userId attached.' },
+    { n: '4', t: 'Success', d: '+10 poin granted. Confirmation screen → Kembali ke Peta.' },
+  ];
+  return (
+    <div style={{
+      width: 740, padding: 32, background: '#FFFDFB',
+      borderRadius: 24, border: '1px solid rgba(60,40,30,0.06)',
+    }}>
+      <div className="mono" style={{
+        fontSize: 11, color: '#A89991', textTransform: 'uppercase',
+        letterSpacing: 1.4, marginBottom: 6,
+      }}>04 · FLOW</div>
+      <div style={{ fontSize: 22, fontWeight: 800, marginBottom: 18, fontFamily: 'Nunito' }}>
+        Submission flow
+      </div>
+      <div style={{
+        display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12,
+        position: 'relative',
+      }}>
+        {steps.map((s, i) => (
+          <div key={s.n} style={{ position: 'relative' }}>
+            <div style={{
+              padding: 16, borderRadius: 14, background: '#FBF4ED',
+              border: '1px solid rgba(60,40,30,0.05)', height: '100%',
+              boxSizing: 'border-box',
+            }}>
+              <div style={{
+                width: 26, height: 26, borderRadius: 13,
+                background: i === 3 ? 'rgba(143,175,143,0.18)' : '#FBEEEA',
+                color: i === 3 ? '#5C7A5C' : '#D88B7C',
+                fontFamily: 'Nunito', fontWeight: 900, fontSize: 12,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                marginBottom: 10,
+              }}>{s.n}</div>
+              <div style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 14, color: '#333727' }}>
+                {s.t}
+              </div>
+              <div style={{ fontSize: 12, color: '#5C5347', marginTop: 6, lineHeight: 1.45 }}>
+                {s.d}
+              </div>
+            </div>
+            {i < 3 && (
+              <div style={{
+                position: 'absolute', right: -12, top: '50%', transform: 'translateY(-50%)',
+                color: '#D8B095', fontSize: 16, fontWeight: 900,
+              }}>›</div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// App
+// ─────────────────────────────────────────────────────────────
+function App() {
+  const [t, setTweak] = useTweaks(DEFAULTS);
+  return (
+    <>
+      <DesignCanvas background="#F6EFEA">
+        <DCSection id="intro" title="" subtitle="">
+          <DCArtboard id="brand" label="" width={720} height={170}
+            style={{ background: 'transparent', boxShadow: 'none', border: 'none' }}>
+            <BrandHeader />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="screens" title="01 · Form states"
+          subtitle="Empty → filled → success. Each phone is independent; tap navbar tabs to test.">
+          <DCArtboard id="empty"   label="A · Empty"   width={400} height={860}>
+            <Phone variant="empty" />
+          </DCArtboard>
+          <DCArtboard id="filled"  label="B · Filled · ready to submit" width={400} height={860}>
+            <Phone variant="filled" />
+          </DCArtboard>
+          <DCArtboard id="success" label="C · Success · +10 poin"       width={400} height={860}>
+            <Phone variant="success" />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="focus" title="02 · Focus view"
+          subtitle="Switch state via the Tweaks panel.">
+          <DCArtboard id="focus" label="Focus" width={460} height={900}>
+            <Phone variant={t.focusVariant} />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="components" title="03 · Components"
+          subtitle="">
+          <DCArtboard id="components" label="Chip + button states" width={820} height={680}>
+            <ComponentSheet />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="flow" title="04 · Flow" subtitle="">
+          <DCArtboard id="flow" label="Submission flow" width={800} height={300}>
+            <FlowCard />
+          </DCArtboard>
+        </DCSection>
+      </DesignCanvas>
+
+      <TweaksPanel title="Tweaks">
+        <TweakSection label="Focus view">
+          <TweakRadio label="Form state"
+            value={t.focusVariant}
+            onChange={(v) => setTweak('focusVariant', v)}
+            options={[
+              { value: 'empty',   label: 'Empty' },
+              { value: 'filled',  label: 'Filled' },
+              { value: 'success', label: 'Success' },
+            ]} />
+        </TweakSection>
+        <TweakSection label="Hint">
+          <div style={{ fontSize: 12, color: '#8A7268', lineHeight: 1.5 }}>
+            The success screen has a subtle checkmark pop, rotating sage ring,
+            radial burst, and twinkling sparkles. Pure CSS — no images.
+          </div>
+        </TweakSection>
+      </TweaksPanel>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

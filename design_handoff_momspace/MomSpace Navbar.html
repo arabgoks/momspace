@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MomSpace · Bottom Navigation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800;900&family=Quicksand:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; height: 100%; }
+  body {
+    background: #F6EFEA;
+    font-family: 'Nunito', system-ui, -apple-system, sans-serif;
+    color: #3D2E27;
+    -webkit-font-smoothing: antialiased;
+  }
+  .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="ios-frame.jsx"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="nav-icons.jsx"></script>
+<script type="text/babel" src="map-screen.jsx"></script>
+<script type="text/babel" src="navbars.jsx"></script>
+
+<script type="text/babel" data-presets="env,react">
+const { useState } = React;
+
+const DEFAULTS = /*EDITMODE-BEGIN*/{
+  "primary": "#E8A598",
+  "secondary": "#8FAF8F",
+  "labels": true,
+  "font": "Nunito"
+}/*EDITMODE-END*/;
+
+// ─────────────────────────────────────────────────────────────
+// Phone preview — iPhone frame with map + chosen navbar
+// ─────────────────────────────────────────────────────────────
+function PhonePreview({ NavComp, navHeight = 88, labelOn = true, initialTab = 0 }) {
+  const [tab, setTab] = useState(initialTab);
+  return (
+    <div style={{ position: 'relative' }}>
+      <IOSDevice width={340} height={720}>
+        <div style={{ position: 'absolute', inset: 0 }}>
+          <MapScreen activeTab={tab} navHeight={navHeight} />
+          <NavComp active={tab} onChange={setTab} labelOn={labelOn} />
+        </div>
+      </IOSDevice>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Detail card — isolated navbar on a soft background, with caption
+// ─────────────────────────────────────────────────────────────
+function NavCard({ title, sub, NavComp, initialTab = 0, labelOn = true, allStates = false }) {
+  const [tab, setTab] = useState(initialTab);
+  return (
+    <div style={{
+      width: 560, padding: '28px 28px 24px',
+      background: '#FFFDFB',
+      borderRadius: 24,
+      boxShadow: '0 1px 0 rgba(60,40,30,0.04) inset, 0 1px 2px rgba(60,40,30,0.04)',
+      border: '1px solid rgba(60,40,30,0.06)',
+    }}>
+      <div style={{ marginBottom: 18 }}>
+        <div className="mono" style={{
+          fontSize: 11, color: '#A89991', textTransform: 'uppercase',
+          letterSpacing: 1.4, fontWeight: 500, marginBottom: 6,
+        }}>{sub}</div>
+        <div style={{ fontSize: 22, fontWeight: 800, color: '#3D2E27' }}>{title}</div>
+      </div>
+
+      {/* The mini "phone-shaped" surface */}
+      <div style={{
+        position: 'relative',
+        height: 140, borderRadius: 18, overflow: 'hidden',
+        background: 'linear-gradient(180deg, #F7EFE8 0%, #F0E1D6 100%)',
+        border: '1px solid rgba(60,40,30,0.06)',
+      }}>
+        {/* fake content shimmer */}
+        <div style={{
+          position: 'absolute', inset: '12px 14px 70px',
+          display: 'flex', flexDirection: 'column', gap: 6,
+        }}>
+          <div style={{ height: 8, width: '40%', background: 'rgba(255,255,255,0.6)', borderRadius: 4 }} />
+          <div style={{ height: 8, width: '70%', background: 'rgba(255,255,255,0.5)', borderRadius: 4 }} />
+          <div style={{ height: 8, width: '55%', background: 'rgba(255,255,255,0.4)', borderRadius: 4 }} />
+        </div>
+        <NavComp active={tab} onChange={setTab} labelOn={labelOn} />
+      </div>
+
+      {/* State row — all four active states side by side */}
+      {allStates && (
+        <div style={{ marginTop: 16 }}>
+          <div className="mono" style={{
+            fontSize: 10.5, color: '#A89991', textTransform: 'uppercase',
+            letterSpacing: 1.4, fontWeight: 500, marginBottom: 10,
+          }}>Each tab active</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
+            {[0,1,2,3].map(i => (
+              <div key={i} style={{
+                position: 'relative', height: 96, borderRadius: 12, overflow: 'hidden',
+                background: '#F7EFE8', border: '1px solid rgba(60,40,30,0.05)',
+              }}>
+                <NavComp active={i} onChange={() => {}} labelOn={labelOn} />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Click hint */}
+      <div className="mono" style={{
+        marginTop: 14, fontSize: 11, color: '#B8A89F', fontWeight: 500,
+      }}>
+        ↑ tap tabs to switch active state
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Anatomy card — labelled diagram of one tab + spec
+// ─────────────────────────────────────────────────────────────
+function AnatomyCard() {
+  return (
+    <div style={{
+      width: 640, padding: 32, background: '#FFFDFB',
+      borderRadius: 24, border: '1px solid rgba(60,40,30,0.06)',
+    }}>
+      <div className="mono" style={{
+        fontSize: 11, color: '#A89991', textTransform: 'uppercase',
+        letterSpacing: 1.4, marginBottom: 6,
+      }}>03 · ANATOMY</div>
+      <div style={{ fontSize: 22, fontWeight: 800, marginBottom: 24 }}>
+        Active &amp; inactive tab
+      </div>
+
+      <div style={{
+        display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32,
+      }}>
+        <SpecTab on={true} />
+        <SpecTab on={false} />
+      </div>
+
+      {/* Token strip */}
+      <div style={{ marginTop: 30, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+        <Token swatch="#E8A598" name="Primary · Dusty rose"  hex="#E8A598" />
+        <Token swatch="#8FAF8F" name="Secondary · Sage"      hex="#8FAF8F" />
+        <Token swatch="#A89991" name="Muted · Inactive"      hex="#A89991" />
+        <Token swatch="#FFFFFF" name="Surface"               hex="#FFFFFF" border />
+        <Token swatch="#3D2E27" name="Ink"                    hex="#3D2E27" />
+      </div>
+
+      <div style={{ marginTop: 24, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+        <SpecRow k="Bar height"      v="60 + 28 safe" />
+        <SpecRow k="Icon"            v="26 × 26 px" />
+        <SpecRow k="Label"           v="Nunito 700 / 11px" />
+        <SpecRow k="Hit area"        v="≥ 48 × 48 px" />
+        <SpecRow k="Active pill bg"  v="rose @ 16% α" />
+        <SpecRow k="Easing"          v="cubic-bezier .2 .8 .2 1" />
+      </div>
+    </div>
+  );
+}
+
+function SpecTab({ on }) {
+  const color = on ? '#E8A598' : '#A89991';
+  return (
+    <div style={{ position: 'relative' }}>
+      <div className="mono" style={{
+        fontSize: 11, color: '#A89991', marginBottom: 12,
+        textTransform: 'uppercase', letterSpacing: 1.2,
+      }}>{on ? 'active' : 'inactive'}</div>
+
+      <div style={{
+        background: '#F7EFE8', borderRadius: 14, padding: '20px 0',
+        display: 'flex', justifyContent: 'center',
+        position: 'relative',
+      }}>
+        <div style={{
+          display: 'flex', flexDirection: 'column', alignItems: 'center',
+        }}>
+          <div style={{
+            width: 44, height: 32, borderRadius: 16,
+            background: on ? 'rgba(232,165,152,0.16)' : 'transparent',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', color,
+          }}>
+            {on ? NavIcons.map.filled : NavIcons.map.outline}
+          </div>
+          <div style={{
+            fontFamily: 'Nunito', fontSize: 11, fontWeight: 700,
+            color, marginTop: 4, letterSpacing: 0.1,
+          }}>Map</div>
+        </div>
+
+        {/* annotations */}
+        <Anno x="60%" y="22%" text={on ? "Filled glyph" : "Outline · 1.9 stroke"} />
+        <Anno x="60%" y="62%" text={on ? "Rose 16% pill" : "No background"} />
+        <Anno x="60%" y="92%" text={on ? "Primary label" : "Muted gray label"} />
+      </div>
+    </div>
+  );
+}
+
+function Anno({ x, y, text }) {
+  return (
+    <div style={{
+      position: 'absolute', left: x, top: y,
+      display: 'flex', alignItems: 'center', gap: 8,
+      transform: 'translateY(-50%)',
+    }}>
+      <div style={{ width: 20, height: 1, background: '#C9B8AE' }} />
+      <div className="mono" style={{
+        fontSize: 10.5, color: '#8A7268', whiteSpace: 'nowrap',
+      }}>{text}</div>
+    </div>
+  );
+}
+
+function Token({ swatch, name, hex, border }) {
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 10,
+      padding: '8px 12px 8px 8px', background: '#F7EFE8',
+      borderRadius: 99,
+    }}>
+      <div style={{
+        width: 22, height: 22, borderRadius: 99, background: swatch,
+        border: border ? '1px solid rgba(60,40,30,0.1)' : 'none',
+      }} />
+      <div style={{ fontWeight: 700, fontSize: 12 }}>{name}</div>
+      <div className="mono" style={{ fontSize: 10.5, color: '#A89991' }}>{hex}</div>
+    </div>
+  );
+}
+
+function SpecRow({ k, v }) {
+  return (
+    <div style={{
+      display: 'flex', justifyContent: 'space-between',
+      padding: '8px 0', borderBottom: '1px dashed rgba(60,40,30,0.1)',
+    }}>
+      <span className="mono" style={{ fontSize: 11.5, color: '#8A7268' }}>{k}</span>
+      <span className="mono" style={{ fontSize: 11.5, fontWeight: 600, color: '#3D2E27' }}>{v}</span>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Brand header
+// ─────────────────────────────────────────────────────────────
+function BrandHeader() {
+  return (
+    <div style={{ width: 720, padding: '0 0 8px' }}>
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14,
+      }}>
+        <div style={{
+          width: 44, height: 44, borderRadius: 14,
+          background: 'linear-gradient(140deg, #E8A598, #F2C6B8)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          color: '#fff', fontWeight: 900, fontSize: 20, fontFamily: 'Nunito',
+          boxShadow: '0 8px 18px rgba(232,165,152,0.4)',
+        }}>M</div>
+        <div>
+          <div style={{ fontSize: 28, fontWeight: 900, letterSpacing: -0.5 }}>
+            MomSpace · Bottom Navigation
+          </div>
+          <div className="mono" style={{ fontSize: 12, color: '#8A7268', marginTop: 2 }}>
+            Smart-city lactation room finder · Jakarta · Flutter (iOS / Android)
+          </div>
+        </div>
+      </div>
+      <div style={{
+        fontSize: 14.5, color: '#5C453A', lineHeight: 1.55,
+        maxWidth: 680, fontWeight: 500,
+      }}>
+        Five takes on the 4-tab bar — <b>Map · Search · Report · Profile</b>. Same icon
+        set and color tokens; different active-state treatments. Tap any tab to switch
+        states. <i>Recommendation: <b>Classic Pill</b> for stability + accessibility, or
+        <b> Center Action</b> if reporting needs strong emphasis.</i>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// App
+// ─────────────────────────────────────────────────────────────
+function App() {
+  const [tweaks, setTweak] = useTweaks(DEFAULTS);
+  const labelOn = tweaks.labels;
+
+  return (
+    <>
+      <DesignCanvas background="#F6EFEA">
+        <DCSection id="intro" title="" subtitle="">
+          <DCArtboard id="brand" label="" width={760} height={170} style={{ background: 'transparent', boxShadow: 'none', border: 'none' }}>
+            <BrandHeader />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="context" title="01 · In context" subtitle="Each variant shown in an iPhone frame above the map screen.">
+          <DCArtboard id="a" label="A · Classic Pill"  width={360} height={760}>
+            <PhonePreview NavComp={NavbarClassic}   labelOn={labelOn} initialTab={0} />
+          </DCArtboard>
+          <DCArtboard id="b" label="B · Minimal Dot"  width={360} height={760}>
+            <PhonePreview NavComp={NavbarDot}       labelOn={labelOn} initialTab={0} />
+          </DCArtboard>
+          <DCArtboard id="c" label="C · Floating Pill" width={360} height={760}>
+            <PhonePreview NavComp={NavbarFloating}  labelOn={labelOn} navHeight={106} initialTab={0} />
+          </DCArtboard>
+          <DCArtboard id="d" label="D · Center Action" width={360} height={760}>
+            <PhonePreview NavComp={NavbarCenterFab} labelOn={labelOn} initialTab={2} />
+          </DCArtboard>
+          <DCArtboard id="e" label="E · Top Accent"    width={360} height={760}>
+            <PhonePreview NavComp={NavbarTopAccent}  labelOn={labelOn} initialTab={0} />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="states" title="02 · State studies" subtitle="The recommended variant across all four active tabs.">
+          <DCArtboard id="states-a" label="A · Classic Pill — all states" width={620} height={420}>
+            <NavCard title="Classic Pill" sub="A · STATES" NavComp={NavbarClassic} labelOn={labelOn} allStates />
+          </DCArtboard>
+          <DCArtboard id="states-d" label="D · Center Action — all states" width={620} height={420}>
+            <NavCard title="Center Action" sub="D · STATES" NavComp={NavbarCenterFab} labelOn={labelOn} initialTab={2} allStates />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="anatomy" title="03 · Anatomy & tokens" subtitle="Active vs inactive tab — measurements & color tokens.">
+          <DCArtboard id="anatomy-1" label="Anatomy" width={700} height={620}>
+            <AnatomyCard />
+          </DCArtboard>
+        </DCSection>
+      </DesignCanvas>
+
+      <TweaksPanel title="Tweaks">
+        <TweakSection title="Display">
+          <TweakToggle label="Show tab labels"
+            value={tweaks.labels}
+            onChange={(v) => setTweak('labels', v)} />
+        </TweakSection>
+        <TweakSection title="Note">
+          <div style={{ fontSize: 12, color: '#8A7268', lineHeight: 1.5 }}>
+            Toggle labels to compare icon-only vs labelled bars across every variant.
+            Tap a tab in any preview to switch active state.
+          </div>
+        </TweakSection>
+      </TweaksPanel>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

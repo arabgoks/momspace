@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MomSpace · Detail Ruang Laktasi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800;900&family=Quicksand:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; height: 100%; }
+  body {
+    background: #F6EFEA;
+    font-family: 'Quicksand', system-ui, -apple-system, sans-serif;
+    color: #333727;
+    -webkit-font-smoothing: antialiased;
+  }
+  .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="ios-frame.jsx"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="nav-icons.jsx"></script>
+<script type="text/babel" src="navbars.jsx"></script>
+<script type="text/babel" src="home-map.jsx"></script>
+<script type="text/babel" src="detail-screen.jsx"></script>
+
+<script type="text/babel" data-presets="env,react">
+const { useState } = React;
+
+const DEFAULTS = /*EDITMODE-BEGIN*/{
+  "focusVariant": "open"
+}/*EDITMODE-END*/;
+
+// ─────────────────────────────────────────────────────────────
+// Phone wrapper
+// ─────────────────────────────────────────────────────────────
+function Phone({ closed }) {
+  return (
+    <IOSDevice width={380} height={820}>
+      <DetailScreen closed={closed} />
+    </IOSDevice>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Brand header
+// ─────────────────────────────────────────────────────────────
+function BrandHeader() {
+  return (
+    <div style={{ width: 720, padding: '0 0 8px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
+        <div style={{
+          width: 44, height: 44, borderRadius: 14,
+          background: 'linear-gradient(140deg, #E8A598, #F2C6B8)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          color: '#fff', fontWeight: 900, fontSize: 20, fontFamily: 'Nunito',
+          boxShadow: '0 8px 18px rgba(232,165,152,0.4)',
+        }}>M</div>
+        <div>
+          <div style={{ fontSize: 28, fontWeight: 900, letterSpacing: -0.5, fontFamily: 'Nunito' }}>
+            MomSpace · Detail Ruang Laktasi
+          </div>
+          <div className="mono" style={{ fontSize: 12, color: '#8A7268', marginTop: 2 }}>
+            Plaza Indonesia · Level 4 · Open &amp; closed states · iPhone
+          </div>
+        </div>
+      </div>
+      <div style={{
+        fontSize: 14.5, color: '#5C5347', lineHeight: 1.55,
+        maxWidth: 680, fontWeight: 500,
+      }}>
+        Detail screen for a single lactation room. Opens from any Home / Map
+        card. Two operating states (Open and Closed) plus a full reference for
+        the facility-tag component used across the app.
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Facility tag states reference
+// ─────────────────────────────────────────────────────────────
+function TagStatesCard() {
+  const examples = ['Bersih', 'Kulkas', 'AC', 'Stroller', 'Wastafel', 'Stopkontak', 'Privasi'];
+  return (
+    <div style={{
+      width: 700, padding: 32, background: '#FFFDFB',
+      borderRadius: 24, border: '1px solid rgba(60,40,30,0.06)',
+    }}>
+      <div className="mono" style={{
+        fontSize: 11, color: '#A89991', textTransform: 'uppercase',
+        letterSpacing: 1.4, marginBottom: 6,
+      }}>03 · FACILITY TAG · STATES</div>
+      <div style={{ fontSize: 22, fontWeight: 800, marginBottom: 22, fontFamily: 'Nunito' }}>
+        Tag language
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
+        <TagSpec
+          state="available"
+          title="Available"
+          sub="Tersedia &amp; terverifikasi"
+          desc="Sage-tinted, check glyph. Default state when latest report confirms the facility." />
+        <TagSpec
+          state="unavailable"
+          title="Unavailable"
+          sub="Tidak tersedia"
+          desc="Muted gray with a strikethrough and × glyph. Used for missing or broken facilities." />
+        <TagSpec
+          state="unverified"
+          title="Unverified"
+          sub="Belum diverifikasi"
+          desc="Dashed outline, ring glyph. Shown when no recent report confirms or denies." />
+      </div>
+
+      <div className="mono" style={{
+        marginTop: 24, fontSize: 11, color: '#A89991', textTransform: 'uppercase',
+        letterSpacing: 1.4, marginBottom: 10,
+      }}>All 7 tags · default available state</div>
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+        {examples.map((l) => <FacilityTag key={l} label={l} state="available" />)}
+      </div>
+
+      <div className="mono" style={{
+        marginTop: 18, fontSize: 11, color: '#A89991', textTransform: 'uppercase',
+        letterSpacing: 1.4, marginBottom: 10,
+      }}>Mixed states · same row</div>
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+        <FacilityTag label="Bersih"     state="available" />
+        <FacilityTag label="Kulkas"     state="unavailable" />
+        <FacilityTag label="AC"         state="available" />
+        <FacilityTag label="Stopkontak" state="unavailable" />
+        <FacilityTag label="Wastafel"   state="unverified" />
+        <FacilityTag label="Privasi"    state="unverified" />
+      </div>
+    </div>
+  );
+}
+
+function TagSpec({ state, title, sub, desc }) {
+  return (
+    <div style={{
+      padding: 16, borderRadius: 16, background: '#FBF4ED',
+      border: '1px solid rgba(60,40,30,0.05)',
+    }}>
+      <div style={{
+        height: 76, display: 'flex', alignItems: 'center', justifyContent: 'center',
+        marginBottom: 12, background: 'radial-gradient(ellipse at center, #F4E8DA 0%, #FBF4ED 70%)',
+        borderRadius: 12,
+      }}>
+        <FacilityTag label="Kulkas" state={state} />
+      </div>
+      <div style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 14, color: '#333727' }}>{title}</div>
+      <div style={{ fontSize: 12, color: '#5C5347', marginTop: 1 }}>{sub}</div>
+      <div style={{ fontSize: 11.5, color: '#7C7062', marginTop: 8, lineHeight: 1.45 }}>{desc}</div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Section breakdown — annotated screen anatomy
+// ─────────────────────────────────────────────────────────────
+function AnatomyCard() {
+  const rows = [
+    ['1', 'Header',          'Back · "Detail Ruang Laktasi" · Share'],
+    ['2', 'Photo',           'Room illustration · 1/4 counter · status badge'],
+    ['3', 'Info card',       'Name · address · distance · operating hours'],
+    ['4', 'Rating row',      'Star score · review count · "Lihat semua"'],
+    ['5', 'Facility tags',   'Horizontal scroll · sage available / muted off'],
+    ['6', 'Latest report',   'Crowd-sourced verified condition note'],
+    ['7', 'Review snippet',  'One user review + see-all link'],
+    ['8', 'Action bar',      'Check-In (outlined) + Navigasi (filled rose)'],
+    ['9', 'Navbar',          'Classic Pill, Map tab active'],
+  ];
+  return (
+    <div style={{
+      width: 540, padding: 32, background: '#FFFDFB',
+      borderRadius: 24, border: '1px solid rgba(60,40,30,0.06)',
+    }}>
+      <div className="mono" style={{
+        fontSize: 11, color: '#A89991', textTransform: 'uppercase',
+        letterSpacing: 1.4, marginBottom: 6,
+      }}>04 · SECTION MAP</div>
+      <div style={{ fontSize: 22, fontWeight: 800, marginBottom: 18, fontFamily: 'Nunito' }}>
+        Screen anatomy
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+        {rows.map(([n, t, d]) => (
+          <div key={n} style={{
+            display: 'flex', gap: 14, alignItems: 'center',
+            padding: '12px 0', borderBottom: '1px dashed rgba(60,40,30,0.1)',
+          }}>
+            <div style={{
+              width: 26, height: 26, borderRadius: 13,
+              background: '#FBEEEA', color: '#D88B7C',
+              fontFamily: 'Nunito', fontWeight: 900, fontSize: 12,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0,
+            }}>{n}</div>
+            <div style={{ minWidth: 110 }}>
+              <div style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 13.5, color: '#333727' }}>
+                {t}
+              </div>
+            </div>
+            <div style={{
+              fontFamily: 'Quicksand', fontWeight: 500, fontSize: 12.5, color: '#5C5347',
+            }}>{d}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// App
+// ─────────────────────────────────────────────────────────────
+function App() {
+  const [t, setTweak] = useTweaks(DEFAULTS);
+  return (
+    <>
+      <DesignCanvas background="#F6EFEA">
+        <DCSection id="intro" title="" subtitle="">
+          <DCArtboard id="brand" label="" width={720} height={170}
+            style={{ background: 'transparent', boxShadow: 'none', border: 'none' }}>
+            <BrandHeader />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="screens" title="01 · Detail · Open / Closed"
+          subtitle="Same screen, two operating states. Scroll inside each phone.">
+          <DCArtboard id="open"   label="A · Open · Buka sekarang"  width={400} height={860}>
+            <Phone closed={false} />
+          </DCArtboard>
+          <DCArtboard id="closed" label="B · Closed · Tutup"        width={400} height={860}>
+            <Phone closed={true} />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="focus" title="02 · Focus view"
+          subtitle="Switch between states via the Tweaks panel.">
+          <DCArtboard id="focus" label="Focus · zoomed" width={460} height={900}>
+            <Phone closed={t.focusVariant === 'closed'} />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="tags" title="03 · Facility tags"
+          subtitle="Component language: available, unavailable, unverified.">
+          <DCArtboard id="tag-states" label="Tag states" width={760} height={560}>
+            <TagStatesCard />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="anatomy" title="04 · Section map" subtitle="">
+          <DCArtboard id="anatomy" label="Anatomy" width={600} height={620}>
+            <AnatomyCard />
+          </DCArtboard>
+        </DCSection>
+      </DesignCanvas>
+
+      <TweaksPanel title="Tweaks">
+        <TweakSection label="Focus view">
+          <TweakRadio label="Operating state"
+            value={t.focusVariant}
+            onChange={(v) => setTweak('focusVariant', v)}
+            options={[
+              { value: 'open',   label: 'Open' },
+              { value: 'closed', label: 'Closed' },
+            ]} />
+        </TweakSection>
+        <TweakSection label="Hint">
+          <div style={{ fontSize: 12, color: '#8A7268', lineHeight: 1.5 }}>
+            Each phone scrolls independently — try the rating row, facility tags,
+            and review section. The Navigasi button disables when closed.
+          </div>
+        </TweakSection>
+      </TweaksPanel>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

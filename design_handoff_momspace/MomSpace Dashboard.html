@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MomSpace · Dashboard Pemerintah</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800;900&family=Quicksand:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; height: 100%; }
+  body {
+    background: #F6EFEA;
+    font-family: 'Quicksand', system-ui, -apple-system, sans-serif;
+    color: #333727;
+    -webkit-font-smoothing: antialiased;
+  }
+  .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="dashboard.jsx"></script>
+
+<script type="text/babel" data-presets="env,react">
+const { useState } = React;
+
+const DEFAULTS = /*EDITMODE-BEGIN*/{
+  "focusPage": "map"
+}/*EDITMODE-END*/;
+
+// ─────────────────────────────────────────────────────────────
+// Desktop window chrome (browser bar) — just enough to feel like
+// a real web app without distracting from the dashboard.
+// ─────────────────────────────────────────────────────────────
+function DesktopFrame({ children, page }) {
+  return (
+    <div style={{
+      width: '100%', height: '100%', borderRadius: 16, overflow: 'hidden',
+      background: '#fff', boxShadow: '0 24px 60px rgba(60,40,30,0.14)',
+      border: '1px solid rgba(60,40,30,0.08)',
+      display: 'flex', flexDirection: 'column',
+    }}>
+      {/* tab bar */}
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 10,
+        padding: '10px 14px', background: '#F5EBE3',
+        borderBottom: '1px solid rgba(60,40,30,0.06)',
+        fontFamily: 'Quicksand', fontWeight: 600, fontSize: 11.5, color: '#7C7062',
+      }}>
+        <div style={{ display: 'flex', gap: 6 }}>
+          <Dot c="#E8998A"/><Dot c="#E8C188"/><Dot c="#8FAF8F"/>
+        </div>
+        <div style={{
+          marginLeft: 8, padding: '5px 12px', borderRadius: 8,
+          background: '#fff', border: '1px solid rgba(60,40,30,0.08)',
+          fontFamily: 'JetBrains Mono', fontSize: 11, color: '#7C7062',
+          display: 'flex', alignItems: 'center', gap: 8,
+        }}>
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
+            <rect x="3" y="6" width="18" height="13" rx="2" stroke="#7C7062" strokeWidth="1.6"/>
+            <circle cx="7" cy="12.5" r="1" fill="#8FAF8F"/>
+          </svg>
+          dashboard.momspace.id/{page}
+        </div>
+      </div>
+      <div style={{ flex: 1, minHeight: 0 }}>{children}</div>
+    </div>
+  );
+}
+function Dot({ c }) {
+  return <div style={{ width: 10, height: 10, borderRadius: 99, background: c }}/>;
+}
+
+// ─────────────────────────────────────────────────────────────
+// Brand header
+// ─────────────────────────────────────────────────────────────
+function BrandHeader() {
+  return (
+    <div style={{ width: 900, padding: '0 0 8px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
+        <div style={{
+          width: 44, height: 44, borderRadius: 14,
+          background: 'linear-gradient(140deg, #E8A598, #F2C6B8)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          color: '#fff', fontWeight: 900, fontSize: 20, fontFamily: 'Nunito',
+          boxShadow: '0 8px 18px rgba(232,165,152,0.4)',
+        }}>M</div>
+        <div>
+          <div style={{ fontSize: 28, fontWeight: 900, letterSpacing: -0.5, fontFamily: 'Nunito' }}>
+            MomSpace · Dashboard Pemerintah
+          </div>
+          <div className="mono" style={{ fontSize: 12, color: '#8A7268', marginTop: 2 }}>
+            Dinas Kesehatan DKI Jakarta · Desktop / tablet web · 1280×900
+          </div>
+        </div>
+      </div>
+      <div style={{
+        fontSize: 14.5, color: '#5C5347', lineHeight: 1.55,
+        maxWidth: 820, fontWeight: 500,
+      }}>
+        Internal monitoring surface for the Dinas. The map page surfaces gap
+        scores and problem reports for daily operations; the analytics page
+        unpacks the Gap Score methodology with bar + scatter views and BPS data
+        provenance. Same warm palette as the public app — friendly but
+        government-grade.
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Component sheet — summary card states, gap-score color ramp
+// ─────────────────────────────────────────────────────────────
+function ComponentSheet() {
+  return (
+    <div style={{
+      width: 1240, padding: 32, background: '#FFFDFB',
+      borderRadius: 24, border: '1px solid rgba(60,40,30,0.06)',
+    }}>
+      <div className="mono" style={{
+        fontSize: 11, color: '#A89991', textTransform: 'uppercase',
+        letterSpacing: 1.4, marginBottom: 6,
+      }}>03 · COMPONENTS</div>
+      <div style={{ fontSize: 22, fontWeight: 800, marginBottom: 22, fontFamily: 'Nunito' }}>
+        Dashboard components &amp; tokens
+      </div>
+
+      {/* Gap Score color ramp */}
+      <div className="mono" style={{
+        fontSize: 11, color: '#A89991', textTransform: 'uppercase',
+        letterSpacing: 1.4, marginBottom: 10,
+      }}>Gap Score · color ramp</div>
+      <div style={{ display: 'flex', gap: 0, borderRadius: 12, overflow: 'hidden', marginBottom: 8 }}>
+        {[10, 25, 40, 55, 70, 85, 95].map((s) => (
+          <div key={s} style={{
+            flex: 1, padding: '18px 0',
+            background: gapColor(s), color: s >= 65 ? '#fff' : '#333727',
+            textAlign: 'center', fontFamily: 'Nunito', fontWeight: 900, fontSize: 16,
+          }}>{s}</div>
+        ))}
+      </div>
+      <div style={{
+        display: 'flex', justifyContent: 'space-between', padding: '0 4px',
+        fontFamily: 'Quicksand', fontWeight: 700, fontSize: 11, color: '#7C7062',
+        marginBottom: 28,
+      }}>
+        <span>0 · Terlayani sangat baik</span>
+        <span style={{ color: '#C97A6E' }}>≥ 70 · Ambang intervensi</span>
+        <span>100 · Krisis</span>
+      </div>
+
+      {/* Summary card example + tokens */}
+      <div className="mono" style={{
+        fontSize: 11, color: '#A89991', textTransform: 'uppercase',
+        letterSpacing: 1.4, marginBottom: 10,
+      }}>Summary card</div>
+      <div style={{
+        display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, marginBottom: 28,
+      }}>
+        <SummaryRow />
+      </div>
+
+      {/* Color tokens */}
+      <div className="mono" style={{
+        fontSize: 11, color: '#A89991', textTransform: 'uppercase',
+        letterSpacing: 1.4, marginBottom: 10,
+      }}>Tokens</div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+        {[
+          ['#E8A598', 'Primary · Rose'],
+          ['#D88B7C', 'Rose · Pressed'],
+          ['#C97A6E', 'Critical · Deep rose'],
+          ['#E8998A', 'Alert · Soft red'],
+          ['#8FAF8F', 'Sage · Positive'],
+          ['#AAB995', 'Muted · Inactive'],
+          ['#FEFEFE', 'Surface', true],
+          ['#FBF6F1', 'Surface · Sand'],
+          ['#333727', 'Ink'],
+        ].map(([hex, n, b]) => (
+          <div key={hex} style={{
+            display: 'flex', alignItems: 'center', gap: 10,
+            padding: '8px 12px 8px 8px', background: '#F7EFE8', borderRadius: 99,
+          }}>
+            <div style={{
+              width: 22, height: 22, borderRadius: 99, background: hex,
+              border: b ? '1px solid rgba(60,40,30,0.12)' : 'none',
+            }} />
+            <div style={{ fontWeight: 700, fontSize: 12, fontFamily: 'Nunito' }}>{n}</div>
+            <div className="mono" style={{ fontSize: 10.5, color: '#A89991' }}>{hex}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// App
+// ─────────────────────────────────────────────────────────────
+function App() {
+  const [t, setTweak] = useTweaks(DEFAULTS);
+
+  return (
+    <>
+      <DesignCanvas background="#F6EFEA">
+        <DCSection id="intro" title="" subtitle="">
+          <DCArtboard id="brand" label="" width={900} height={170}
+            style={{ background: 'transparent', boxShadow: 'none', border: 'none' }}>
+            <BrandHeader />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="screens" title="01 · Dashboard pages"
+          subtitle="Two pages of the gov dashboard, rendered at 1280×900.">
+          <DCArtboard id="map" label="A · Peta Distribusi" width={1280} height={920}>
+            <DesktopFrame page="peta-distribusi">
+              <PetaDistribusiPage />
+            </DesktopFrame>
+          </DCArtboard>
+          <DCArtboard id="gap" label="B · Analisis Gap Score" width={1280} height={920}>
+            <DesktopFrame page="gap-score">
+              <GapAnalyticsPage />
+            </DesktopFrame>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="focus" title="02 · Focus view"
+          subtitle="Toggle pages via the Tweaks panel for inspection.">
+          <DCArtboard id="focus" label="Focus" width={1400} height={1000}>
+            <DesktopFrame page={t.focusPage === 'gap' ? 'gap-score' : 'peta-distribusi'}>
+              {t.focusPage === 'gap'
+                ? <GapAnalyticsPage />
+                : <PetaDistribusiPage />}
+            </DesktopFrame>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="components" title="03 · Components &amp; tokens" subtitle="">
+          <DCArtboard id="components" label="Components" width={1300} height={760}>
+            <ComponentSheet />
+          </DCArtboard>
+        </DCSection>
+      </DesignCanvas>
+
+      <TweaksPanel title="Tweaks">
+        <TweakSection label="Focus view">
+          <TweakRadio label="Page"
+            value={t.focusPage}
+            onChange={(v) => setTweak('focusPage', v)}
+            options={[
+              { value: 'map', label: 'Peta' },
+              { value: 'gap', label: 'Gap Score' },
+            ]} />
+        </TweakSection>
+        <TweakSection label="Hint">
+          <div style={{ fontSize: 12, color: '#8A7268', lineHeight: 1.5 }}>
+            Hover any kecamatan on the map to see its detail tooltip (Gambir
+            pins by default). The bar chart marks the 70-point intervention
+            threshold; the scatter labels every high-priority district.
+          </div>
+        </TweakSection>
+      </TweaksPanel>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

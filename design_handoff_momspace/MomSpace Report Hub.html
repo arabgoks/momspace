@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MomSpace · Report Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800;900&family=Quicksand:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; height: 100%; }
+  body {
+    background: #F6EFEA;
+    font-family: 'Quicksand', system-ui, -apple-system, sans-serif;
+    color: #333727;
+    -webkit-font-smoothing: antialiased;
+  }
+  .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="ios-frame.jsx"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="nav-icons.jsx"></script>
+<script type="text/babel" src="navbars.jsx"></script>
+<script type="text/babel" src="home-map.jsx"></script>
+<script type="text/babel" src="report-hub.jsx"></script>
+
+<script type="text/babel" data-presets="env,react">
+const { useState } = React;
+
+const DEFAULTS = /*EDITMODE-BEGIN*/{
+  "focusVariant": "default"
+}/*EDITMODE-END*/;
+
+function Phone({ pressed }) {
+  return (
+    <IOSDevice width={380} height={820}>
+      <ReportHubScreen pressed={pressed} />
+    </IOSDevice>
+  );
+}
+
+function BrandHeader() {
+  return (
+    <div style={{ width: 720, padding: '0 0 8px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
+        <div style={{
+          width: 44, height: 44, borderRadius: 14,
+          background: 'linear-gradient(140deg, #E8A598, #F2C6B8)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          color: '#fff', fontWeight: 900, fontSize: 20, fontFamily: 'Nunito',
+          boxShadow: '0 8px 18px rgba(232,165,152,0.4)',
+        }}>M</div>
+        <div>
+          <div style={{ fontSize: 28, fontWeight: 900, letterSpacing: -0.5, fontFamily: 'Nunito' }}>
+            MomSpace · Report Hub
+          </div>
+          <div className="mono" style={{ fontSize: 12, color: '#8A7268', marginTop: 2 }}>
+            Bottom sheet · contribution chooser · iPhone
+          </div>
+        </div>
+      </div>
+      <div style={{
+        fontSize: 14.5, color: '#5C5347', lineHeight: 1.55,
+        maxWidth: 680, fontWeight: 500,
+      }}>
+        Tapping the <b>Report</b> tab opens this contribution hub over a
+        dimmed, blurred Home Map. Two routes from one entry point — report
+        condition of an existing room, or submit a brand-new location.
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Sheet-only preview (no phone chrome) — for inspection
+// ─────────────────────────────────────────────────────────────
+function SheetPreview({ pressed }) {
+  return (
+    <div style={{
+      width: 380, padding: 24, background: 'transparent',
+      display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+      position: 'relative', height: 380,
+    }}>
+      {/* Soft fake backdrop */}
+      <div style={{
+        position: 'absolute', inset: 12,
+        borderRadius: 28,
+        background: 'linear-gradient(180deg, #F3E0CF 0%, #C9A39A 100%)',
+        filter: 'blur(0.4px)',
+        boxShadow: 'inset 0 0 0 1px rgba(60,40,30,0.08)',
+      }} />
+      <div style={{
+        position: 'absolute', inset: 12, borderRadius: 28,
+        background: 'rgba(51,55,39,0.32)',
+      }} />
+      {/* The sheet, in its natural shape */}
+      <div style={{
+        position: 'relative', width: 332,
+        borderTopLeftRadius: 28, borderTopRightRadius: 28,
+        background: '#FEFEFE',
+        boxShadow: '0 -22px 50px rgba(60,40,30,0.22)',
+        paddingTop: 10, paddingBottom: 18,
+        fontFamily: 'Quicksand',
+      }}>
+        <div style={{ width: 44, height: 5, borderRadius: 3, background: '#E2D5C9', margin: '0 auto 14px' }} />
+        <div style={{ padding: '0 22px 16px' }}>
+          <div style={{ fontFamily: 'Nunito', fontWeight: 900, fontSize: 20, color: '#333727', letterSpacing: -0.3 }}>Kontribusi Data</div>
+          <div style={{ fontWeight: 600, fontSize: 12.5, color: '#AAB995', marginTop: 4 }}>
+            Pilih jenis kontribusi yang ingin kamu berikan
+          </div>
+        </div>
+        <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <OptionCard
+            icon={(c) => <ClipboardIcon color={c} />}
+            title="Laporkan Kondisi Ruang"
+            sub="Bagikan kondisi terkini ruang laktasi yang baru kamu kunjungi"
+            tone="rose" pressed={pressed} />
+          <OptionCard
+            icon={(c) => <PinPlusIcon color={c} />}
+            title="Tambah Lokasi Baru"
+            sub="Usulkan ruang laktasi yang belum terdaftar di MomSpace"
+            tone="sage" pressed={false} />
+        </div>
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          gap: 6, marginTop: 16, padding: '0 22px',
+        }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2l3 6.5 7 1-5 5 1.2 7L12 18l-6.2 3.5L7 14.5 2 9.5l7-1L12 2z" fill="#E8A598"/>
+          </svg>
+          <span style={{ fontWeight: 700, fontSize: 12, color: '#7C7062' }}>
+            Setiap kontribusi memberi kamu{' '}
+            <span style={{ color: '#D88B7C', fontFamily: 'Nunito', fontWeight: 800 }}>+10 poin reward</span>
+          </span>
+        </div>
+        <div style={{
+          textAlign: 'center', marginTop: 14,
+          paddingTop: 14, marginLeft: 22, marginRight: 22,
+          borderTop: '1px solid rgba(60,40,30,0.06)',
+        }}>
+          <span style={{
+            fontFamily: 'Nunito', fontWeight: 800, fontSize: 13, color: '#9E948A',
+          }}>Batal</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Anatomy card
+// ─────────────────────────────────────────────────────────────
+function AnatomyCard() {
+  const rows = [
+    ['1', 'Backdrop',     'Home Map blurred 6 px · gradient dim 18 → 42 %'],
+    ['2', 'Drag handle',  '44 × 5 px · sand color · indicates swipe-down'],
+    ['3', 'Title block',  'Nunito 900 / 20 · subtitle in sage muted'],
+    ['4', 'Option cards', 'Sand fill · 18 r · 1.5 px subtle border'],
+    ['5', 'Icon chip',    '52 × 52 · 14 r · rose tint / sage tint'],
+    ['6', 'Chevron',      'White circle (idle) → filled accent (pressed)'],
+    ['7', 'Reward note',  'Inline star + "+10 poin reward" pill'],
+    ['8', 'Cancel area',  'Divider above · "Batal" muted text button'],
+    ['9', 'Navbar',       'Stays visible · Report tab active'],
+  ];
+  return (
+    <div style={{
+      width: 540, padding: 32, background: '#FFFDFB',
+      borderRadius: 24, border: '1px solid rgba(60,40,30,0.06)',
+    }}>
+      <div className="mono" style={{
+        fontSize: 11, color: '#A89991', textTransform: 'uppercase',
+        letterSpacing: 1.4, marginBottom: 6,
+      }}>03 · ANATOMY</div>
+      <div style={{ fontSize: 22, fontWeight: 800, marginBottom: 18, fontFamily: 'Nunito' }}>
+        Sheet anatomy
+      </div>
+      <div>
+        {rows.map(([n, t, d]) => (
+          <div key={n} style={{
+            display: 'flex', gap: 14, alignItems: 'center',
+            padding: '12px 0', borderBottom: '1px dashed rgba(60,40,30,0.1)',
+          }}>
+            <div style={{
+              width: 26, height: 26, borderRadius: 13,
+              background: '#FBEEEA', color: '#D88B7C',
+              fontFamily: 'Nunito', fontWeight: 900, fontSize: 12,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0,
+            }}>{n}</div>
+            <div style={{ minWidth: 110 }}>
+              <div style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 13.5, color: '#333727' }}>
+                {t}
+              </div>
+            </div>
+            <div style={{
+              fontFamily: 'Quicksand', fontWeight: 500, fontSize: 12.5, color: '#5C5347',
+            }}>{d}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Card states reference
+// ─────────────────────────────────────────────────────────────
+function CardStatesCard() {
+  return (
+    <div style={{
+      width: 540, padding: 32, background: '#FFFDFB',
+      borderRadius: 24, border: '1px solid rgba(60,40,30,0.06)',
+    }}>
+      <div className="mono" style={{
+        fontSize: 11, color: '#A89991', textTransform: 'uppercase',
+        letterSpacing: 1.4, marginBottom: 6,
+      }}>04 · CARD STATES</div>
+      <div style={{ fontSize: 22, fontWeight: 800, marginBottom: 18, fontFamily: 'Nunito' }}>
+        Idle / pressed
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <div>
+          <div className="mono" style={{
+            fontSize: 10.5, color: '#A89991', textTransform: 'uppercase',
+            letterSpacing: 1.2, marginBottom: 8,
+          }}>Idle</div>
+          <OptionCard
+            icon={(c) => <ClipboardIcon color={c} />}
+            title="Laporkan Kondisi Ruang"
+            sub="Bagikan kondisi terkini ruang laktasi yang baru kamu kunjungi"
+            tone="rose" pressed={false} />
+        </div>
+        <div>
+          <div className="mono" style={{
+            fontSize: 10.5, color: '#A89991', textTransform: 'uppercase',
+            letterSpacing: 1.2, marginBottom: 8,
+          }}>Pressed · rose</div>
+          <OptionCard
+            icon={(c) => <ClipboardIcon color={c} />}
+            title="Laporkan Kondisi Ruang"
+            sub="Bagikan kondisi terkini ruang laktasi yang baru kamu kunjungi"
+            tone="rose" pressed={true} />
+        </div>
+        <div>
+          <div className="mono" style={{
+            fontSize: 10.5, color: '#A89991', textTransform: 'uppercase',
+            letterSpacing: 1.2, marginBottom: 8,
+          }}>Pressed · sage</div>
+          <OptionCard
+            icon={(c) => <PinPlusIcon color={c} />}
+            title="Tambah Lokasi Baru"
+            sub="Usulkan ruang laktasi yang belum terdaftar di MomSpace"
+            tone="sage" pressed={true} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// App
+// ─────────────────────────────────────────────────────────────
+function App() {
+  const [t, setTweak] = useTweaks(DEFAULTS);
+  return (
+    <>
+      <DesignCanvas background="#F6EFEA">
+        <DCSection id="intro" title="" subtitle="">
+          <DCArtboard id="brand" label="" width={720} height={170}
+            style={{ background: 'transparent', boxShadow: 'none', border: 'none' }}>
+            <BrandHeader />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="screens" title="01 · In context"
+          subtitle="Bottom sheet over a dimmed, blurred Home Map. Navbar Report active.">
+          <DCArtboard id="default" label="A · Default · sheet just appeared" width={400} height={860}>
+            <Phone pressed={false} />
+          </DCArtboard>
+          <DCArtboard id="pressed" label="B · Card 1 pressed · rose tint" width={400} height={860}>
+            <Phone pressed={true} />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="focus" title="02 · Focus view" subtitle="Toggle press state via Tweaks.">
+          <DCArtboard id="focus" label="Focus" width={460} height={900}>
+            <Phone pressed={t.focusVariant === 'pressed'} />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="anatomy" title="03 · Anatomy &amp; states" subtitle="">
+          <DCArtboard id="anatomy" label="Anatomy"     width={600} height={620}>
+            <AnatomyCard />
+          </DCArtboard>
+          <DCArtboard id="states"  label="Card states" width={600} height={520}>
+            <CardStatesCard />
+          </DCArtboard>
+        </DCSection>
+      </DesignCanvas>
+
+      <TweaksPanel title="Tweaks">
+        <TweakSection label="Focus view">
+          <TweakRadio label="Card state"
+            value={t.focusVariant}
+            onChange={(v) => setTweak('focusVariant', v)}
+            options={[
+              { value: 'default', label: 'Default' },
+              { value: 'pressed', label: 'Pressed' },
+            ]} />
+        </TweakSection>
+        <TweakSection label="Hint">
+          <div style={{ fontSize: 12, color: '#8A7268', lineHeight: 1.5 }}>
+            The sheet slides up with a soft spring on appear. Backdrop is the
+            real Home Map blurred + dimmed — try toggling card states.
+          </div>
+        </TweakSection>
+      </TweaksPanel>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

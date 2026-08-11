@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MomSpace · Home / Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800;900&family=Quicksand:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; height: 100%; }
+  body {
+    background: #F6EFEA;
+    font-family: 'Quicksand', system-ui, -apple-system, sans-serif;
+    color: #333727;
+    -webkit-font-smoothing: antialiased;
+  }
+  .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="ios-frame.jsx"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="nav-icons.jsx"></script>
+<script type="text/babel" src="navbars.jsx"></script>
+<script type="text/babel" src="home-map.jsx"></script>
+
+<script type="text/babel" data-presets="env,react">
+const { useState } = React;
+
+const DEFAULTS = /*EDITMODE-BEGIN*/{
+  "selectedSheet": "default",
+  "showLabels": true
+}/*EDITMODE-END*/;
+
+// ─────────────────────────────────────────────────────────────
+// Phone wrapper
+// ─────────────────────────────────────────────────────────────
+function Phone({ sheetVariant }) {
+  return (
+    <IOSDevice width={380} height={800}>
+      <div style={{ position: 'absolute', inset: 0 }}>
+        <HomeMapScreen sheetVariant={sheetVariant} />
+      </div>
+    </IOSDevice>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Header
+// ─────────────────────────────────────────────────────────────
+function BrandHeader() {
+  return (
+    <div style={{ width: 720, padding: '0 0 8px' }}>
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14,
+      }}>
+        <div style={{
+          width: 44, height: 44, borderRadius: 14,
+          background: 'linear-gradient(140deg, #E8A598, #F2C6B8)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          color: '#fff', fontWeight: 900, fontSize: 20, fontFamily: 'Nunito',
+          boxShadow: '0 8px 18px rgba(232,165,152,0.4)',
+        }}>M</div>
+        <div>
+          <div style={{
+            fontSize: 28, fontWeight: 900, letterSpacing: -0.5,
+            fontFamily: 'Nunito',
+          }}>
+            MomSpace · Home / Map
+          </div>
+          <div className="mono" style={{ fontSize: 12, color: '#8A7268', marginTop: 2 }}>
+            Layar utama · Peta ruang laktasi terdekat · iPhone
+          </div>
+        </div>
+      </div>
+      <div style={{
+        fontSize: 14.5, color: '#5C5347', lineHeight: 1.55,
+        maxWidth: 680, fontWeight: 500,
+      }}>
+        Three bottom-sheet states for the same map view. Pins are rose when
+        available, muted gray when closed, and grow with a soft shadow when
+        selected. The Classic Pill navbar from the previous study lives at the
+        foot of every screen. Tap any tab to switch active state.
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Pin states reference card
+// ─────────────────────────────────────────────────────────────
+function PinStates() {
+  return (
+    <div style={{
+      width: 680, padding: 32, background: '#FFFDFB',
+      borderRadius: 24, border: '1px solid rgba(60,40,30,0.06)',
+    }}>
+      <div className="mono" style={{
+        fontSize: 11, color: '#A89991', textTransform: 'uppercase',
+        letterSpacing: 1.4, marginBottom: 6,
+      }}>04 · MAP PIN STATES</div>
+      <div style={{ fontSize: 22, fontWeight: 800, marginBottom: 24, fontFamily: 'Nunito' }}>
+        Pin language
+      </div>
+
+      <div style={{
+        display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16,
+      }}>
+        <PinSpec state="available" title="Available"  sub="Ruang tersedia"
+          hex="#E8A598" desc="Default pin for any open lactation room." />
+        <PinSpec state="selected" title="Selected"   sub="Dipilih"
+          hex="#D88B7C" desc="Tapped or center-of-screen. Larger, deeper rose, soft shadow halo." />
+        <PinSpec state="closed"   title="Closed"     sub="Tutup / tidak tersedia"
+          hex="#BFB6AE" desc="Muted gray to recede on the map without disappearing." />
+      </div>
+
+      {/* User dot row */}
+      <div style={{
+        marginTop: 22, padding: 16, borderRadius: 16,
+        background: '#F7EFE8',
+        display: 'flex', alignItems: 'center', gap: 18,
+      }}>
+        <div style={{ position: 'relative', width: 60, height: 60 }}>
+          <UserDot x={50} y={50} />
+        </div>
+        <div>
+          <div style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 15, color: '#333727' }}>
+            User location
+          </div>
+          <div style={{ fontSize: 12.5, color: '#5C5347', marginTop: 2 }}>
+            Blue dot with a soft pulse ring. Stays distinct from any pin color.
+          </div>
+        </div>
+        <div className="mono" style={{ marginLeft: 'auto', fontSize: 11, color: '#A89991' }}>
+          #5B8DEF
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PinSpec({ state, title, sub, hex, desc }) {
+  return (
+    <div style={{
+      padding: 16, borderRadius: 16, background: '#FBF4ED',
+      border: '1px solid rgba(60,40,30,0.05)',
+    }}>
+      <div style={{
+        position: 'relative', height: 96, marginBottom: 12,
+        display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+        background: 'radial-gradient(ellipse at 50% 90%, #EFE2D2 0%, #FBF4ED 70%)',
+        borderRadius: 12,
+      }}>
+        <div style={{ position: 'relative', width: 60, height: 80 }}>
+          <Pin x={50} y={92} state={state} size={1.4} />
+        </div>
+      </div>
+      <div style={{
+        fontFamily: 'Nunito', fontWeight: 800, fontSize: 14, color: '#333727',
+      }}>{title}</div>
+      <div style={{ fontSize: 12, color: '#5C5347', marginTop: 1 }}>{sub}</div>
+      <div style={{ fontSize: 11.5, color: '#7C7062', marginTop: 8, lineHeight: 1.4 }}>
+        {desc}
+      </div>
+      <div className="mono" style={{
+        marginTop: 10, fontSize: 10.5, color: '#A89991',
+        display: 'flex', alignItems: 'center', gap: 6,
+      }}>
+        <span style={{
+          width: 10, height: 10, borderRadius: 99, background: hex,
+          border: '1px solid rgba(60,40,30,0.1)',
+        }} />
+        {hex}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Token strip card
+// ─────────────────────────────────────────────────────────────
+function TokenCard() {
+  const tokens = [
+    { sw: '#E8A598', n: 'Primary · Rose',     h: '#E8A598' },
+    { sw: '#D88B7C', n: 'Rose · Pressed',     h: '#D88B7C' },
+    { sw: '#FBEEEA', n: 'Rose · Tint',        h: '#FBEEEA' },
+    { sw: '#8FAF8F', n: 'Secondary · Sage',   h: '#8FAF8F' },
+    { sw: '#AAB995', n: 'Muted',              h: '#AAB995' },
+    { sw: '#FEFEFE', n: 'Surface',            h: '#FEFEFE', border: true },
+    { sw: '#333727', n: 'Ink',                h: '#333727' },
+    { sw: '#5B8DEF', n: 'User location',      h: '#5B8DEF' },
+  ];
+  return (
+    <div style={{
+      width: 680, padding: 24, background: '#FFFDFB',
+      borderRadius: 24, border: '1px solid rgba(60,40,30,0.06)',
+    }}>
+      <div className="mono" style={{
+        fontSize: 11, color: '#A89991', textTransform: 'uppercase',
+        letterSpacing: 1.4, marginBottom: 6,
+      }}>05 · TOKENS &amp; TYPE</div>
+      <div style={{ fontSize: 22, fontWeight: 800, marginBottom: 18, fontFamily: 'Nunito' }}>
+        Carried over from navbar study
+      </div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+        {tokens.map((t) => (
+          <div key={t.h} style={{
+            display: 'flex', alignItems: 'center', gap: 10,
+            padding: '8px 12px 8px 8px', background: '#F7EFE8', borderRadius: 99,
+          }}>
+            <div style={{
+              width: 22, height: 22, borderRadius: 99, background: t.sw,
+              border: t.border ? '1px solid rgba(60,40,30,0.12)' : 'none',
+            }} />
+            <div style={{ fontWeight: 700, fontSize: 12, fontFamily: 'Nunito' }}>{t.n}</div>
+            <div className="mono" style={{ fontSize: 10.5, color: '#A89991' }}>{t.h}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{ marginTop: 20, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+        <TypeSample label="Headings · Nunito 800" family="Nunito" weight={800} size={22}
+          sample="Plaza Indonesia · Lt. 4" />
+        <TypeSample label="Body · Quicksand 600" family="Quicksand" weight={600} size={14}
+          sample="220 m · Buka sekarang · ★ 4.8" />
+      </div>
+    </div>
+  );
+}
+
+function TypeSample({ label, family, weight, size, sample }) {
+  return (
+    <div style={{
+      padding: 16, borderRadius: 14, background: '#F7EFE8',
+    }}>
+      <div className="mono" style={{ fontSize: 10.5, color: '#A89991', marginBottom: 8 }}>
+        {label}
+      </div>
+      <div style={{ fontFamily: `${family}, system-ui`, fontWeight: weight, fontSize: size, color: '#333727' }}>
+        {sample}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// App
+// ─────────────────────────────────────────────────────────────
+function App() {
+  const [t, setTweak] = useTweaks(DEFAULTS);
+  return (
+    <>
+      <DesignCanvas background="#F6EFEA">
+        <DCSection id="intro" title="" subtitle="">
+          <DCArtboard id="brand" label="" width={720} height={170}
+            style={{ background: 'transparent', boxShadow: 'none', border: 'none' }}>
+            <BrandHeader />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="screens" title="01 · Bottom-sheet states"
+          subtitle="Same map view, three sheet variants. Tap navbar tabs to test active state.">
+          <DCArtboard id="default" label="A · Default — location selected" width={400} height={840}>
+            <Phone sheetVariant="default" />
+          </DCArtboard>
+          <DCArtboard id="empty" label="B · Empty — nearest rooms list"   width={400} height={840}>
+            <Phone sheetVariant="empty" />
+          </DCArtboard>
+          <DCArtboard id="loading" label="C · Loading — skeleton shimmer" width={400} height={840}>
+            <Phone sheetVariant="loading" />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="focus" title="02 · Focus view"
+          subtitle="A single screen at full inspection size.">
+          <DCArtboard id="focus-default" label="Default · zoomed" width={460} height={860}>
+            <Phone sheetVariant={t.selectedSheet} />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="pins" title="03 · Map pin language"
+          subtitle="Three pin states + user location dot.">
+          <DCArtboard id="pinstates" label="Pin states" width={740} height={520}>
+            <PinStates />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="tokens" title="04 · Tokens" subtitle="">
+          <DCArtboard id="tokenscard" label="Color &amp; type" width={740} height={460}>
+            <TokenCard />
+          </DCArtboard>
+        </DCSection>
+      </DesignCanvas>
+
+      <TweaksPanel title="Tweaks">
+        <TweakSection label="Focus view">
+          <TweakRadio label="Bottom-sheet state"
+            value={t.selectedSheet}
+            onChange={(v) => setTweak('selectedSheet', v)}
+            options={[
+              { value: 'default', label: 'Default' },
+              { value: 'empty',   label: 'Empty' },
+              { value: 'loading', label: 'Loading' },
+            ]} />
+        </TweakSection>
+        <TweakSection label="Hint">
+          <div style={{ fontSize: 12, color: '#8A7268', lineHeight: 1.5 }}>
+            The Focus view (section 02) reflects this choice. Drag artboards to
+            reorder, click an artboard to open it fullscreen.
+          </div>
+        </TweakSection>
+      </TweaksPanel>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
