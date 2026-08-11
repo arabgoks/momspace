@@ -11,7 +11,7 @@ const Room demoSelectedRoom = Room(
   isOpen: true,
   rating: 4.8,
   reviewCount: 124,
-  facilities: ['✓ Bersih', 'Kulkas', 'AC', 'Stroller'],
+  facilities: ['Bersih', 'Kulkas', 'AC', 'Stroller'],
 );
 
 const List<Room> demoNearbyRooms = [

@@ -18,6 +18,13 @@ const String _chevronGlyph = '''
   <path d="M9 6l6 6-6 6" stroke="#D88B7C" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>''';
 
+const String _checkGlyph = '''
+<svg viewBox="0 0 24 24" fill="none">
+  <path d="M5 13l4 4 10-10" stroke="{{c}}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>''';
+
+String _hex(Color c) => '#${c.toARGB32().toRadixString(16).substring(2)}';
+
 /// Dispatches to the three Home/Map bottom-sheet states.
 /// Source: home-map.jsx `SheetDefault` / `SheetEmpty` / `SheetLoading`.
 class RoomBottomSheet extends StatelessWidget {
@@ -92,6 +99,8 @@ class SheetShell extends StatelessWidget {
   }
 }
 
+/// A confirmed-available facility tag. Always renders its own check glyph —
+/// the glyph must never be baked into the facility label string itself.
 class SheetFacilityTag extends StatelessWidget {
   const SheetFacilityTag(this.label, {super.key});
 
@@ -105,13 +114,24 @@ class SheetFacilityTag extends StatelessWidget {
         color: AppColors.sageTint,
         borderRadius: BorderRadius.circular(999),
       ),
-      child: Text(
-        label,
-        style: AppTypography.quicksand(
-          fontSize: 11.5,
-          fontWeight: FontWeight.w700,
-          color: AppColors.secondary,
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SvgPicture.string(
+            _checkGlyph.replaceAll('{{c}}', _hex(AppColors.sageDk)),
+            width: 10,
+            height: 10,
+          ),
+          const SizedBox(width: 5),
+          Text(
+            label,
+            style: AppTypography.quicksand(
+              fontSize: 11.5,
+              fontWeight: FontWeight.w700,
+              color: AppColors.sageDk,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -206,13 +226,15 @@ class SheetDefault extends StatelessWidget {
                             height: 7,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: AppColors.secondary,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppColors.secondary.withValues(alpha: 0.2),
-                                  spreadRadius: 3,
-                                ),
-                              ],
+                              color: room.isOpen ? AppColors.secondary : AppColors.textFaint,
+                              boxShadow: room.isOpen
+                                  ? [
+                                      BoxShadow(
+                                        color: AppColors.secondary.withValues(alpha: 0.2),
+                                        spreadRadius: 3,
+                                      ),
+                                    ]
+                                  : null,
                             ),
                           ),
                           const SizedBox(width: 5),
@@ -221,7 +243,7 @@ class SheetDefault extends StatelessWidget {
                             style: AppTypography.quicksand(
                               fontSize: 12.5,
                               fontWeight: FontWeight.w700,
-                              color: AppColors.secondary,
+                              color: room.isOpen ? AppColors.secondary : AppColors.body,
                             ),
                           ),
                         ],
@@ -229,11 +251,7 @@ class SheetDefault extends StatelessWidget {
                       const SizedBox(height: AppSpacing.s4),
                       Row(
                         children: [
-                          const RatingStar(),
-                          const RatingStar(),
-                          const RatingStar(),
-                          const RatingStar(),
-                          const RatingStar(half: true),
+                          ...RatingStar.rowFor(room.rating),
                           const SizedBox(width: AppSpacing.s4),
                           Text(
                             room.rating.toStringAsFixed(1),
@@ -416,16 +434,16 @@ class _NearbyRoomCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: AppColors.sageTint,
+                  color: room.isOpen ? AppColors.sageTint : AppColors.disabledFill,
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
-                  'BUKA',
+                  room.isOpen ? 'BUKA' : 'TUTUP',
                   style: AppTypography.quicksand(
                     fontSize: 9.5,
                     fontWeight: FontWeight.w700,
                     height: 1.2,
-                    color: AppColors.secondary,
+                    color: room.isOpen ? AppColors.sageDk : AppColors.textFaint,
                   ),
                 ),
               ),
