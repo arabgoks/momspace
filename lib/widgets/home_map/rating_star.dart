@@ -9,9 +9,10 @@ const String _starPath =
 /// Five-point rating star, full or half-filled.
 /// Source: home-map.jsx `Star`.
 class RatingStar extends StatelessWidget {
-  const RatingStar({super.key, this.half = false, this.size = 13});
+  const RatingStar({super.key, this.half = false, this.empty = false, this.size = 13});
 
   final bool half;
+  final bool empty;
   final double size;
 
   static String _hex(Color c) => '#${c.toARGB32().toRadixString(16).substring(2)}';
@@ -19,13 +20,19 @@ class RatingStar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final rose = _hex(AppColors.primary);
-    final svg = half
+    final disabled = _hex(AppColors.disabledFill);
+    final svg = empty
+        ? '''
+<svg viewBox="0 0 24 24">
+  <path d="$_starPath" fill="$disabled"/>
+</svg>'''
+        : half
         ? '''
 <svg viewBox="0 0 24 24">
   <defs>
     <linearGradient id="halfStarGrad">
       <stop offset="50%" stop-color="$rose"/>
-      <stop offset="50%" stop-color="#E6D9CE"/>
+      <stop offset="50%" stop-color="$disabled"/>
     </linearGradient>
   </defs>
   <path d="$_starPath" fill="url(#halfStarGrad)"/>

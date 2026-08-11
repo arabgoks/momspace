@@ -6,6 +6,7 @@ import '../../theme/app_colors.dart';
 import '../../theme/app_shadows.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
+import '../../screens/detail_screen.dart';
 import 'rating_star.dart';
 import 'skeleton_box.dart';
 
@@ -110,7 +111,7 @@ class SheetFacilityTag extends StatelessWidget {
         style: AppTypography.quicksand(
           fontSize: 11.5,
           fontWeight: FontWeight.w700,
-          color: AppColors.secondary,
+          color: AppColors.sageDk,
         ),
       ),
     );
@@ -128,165 +129,175 @@ class SheetDefault extends StatelessWidget {
   Widget build(BuildContext context) {
     return SheetShell(
       height: 188,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s16),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 64,
-                  height: 64,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(18),
-                    gradient: const LinearGradient(
-                      begin: Alignment(-0.7, -1),
-                      end: Alignment(0.7, 1),
-                      colors: [AppColors.primary, AppColors.rose03],
-                    ),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Color(0x66E8A598), // rgba(232,165,152,0.4)
-                        offset: Offset(0, 6),
-                        blurRadius: 14,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            Navigator.push(context, MaterialPageRoute(builder: (_) => DetailScreen(room: room)));
+          },
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s16),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 64,
+                      height: 64,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(18),
+                        gradient: const LinearGradient(
+                          begin: Alignment(-0.7, -1),
+                          end: Alignment(0.7, 1),
+                          colors: [AppColors.primary, AppColors.rose03],
+                        ),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Color(0x66E8A598), // rgba(232,165,152,0.4)
+                            offset: Offset(0, 6),
+                            blurRadius: 14,
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    room.avatarInitial,
-                    style: AppTypography.nunito(
-                      fontSize: 26,
-                      fontWeight: FontWeight.w900,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.s12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        room.name,
+                      alignment: Alignment.center,
+                      child: Text(
+                        room.avatarInitial,
                         style: AppTypography.nunito(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800,
-                          height: 1.25,
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.s4),
-                      Row(
-                        children: [
-                          Text(
-                            room.distanceLabel,
-                            style: AppTypography.quicksand(
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.body,
-                            ),
-                          ),
-                          const SizedBox(width: AppSpacing.s8),
-                          Opacity(
-                            opacity: 0.4,
-                            child: Text(
-                              '·',
-                              style: AppTypography.quicksand(
-                                fontSize: 12.5,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.body,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: AppSpacing.s8),
-                          Container(
-                            width: 7,
-                            height: 7,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: AppColors.secondary,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppColors.secondary.withValues(alpha: 0.2),
-                                  spreadRadius: 3,
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 5),
-                          Text(
-                            room.isOpen ? 'Buka sekarang' : 'Tutup',
-                            style: AppTypography.quicksand(
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.secondary,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: AppSpacing.s4),
-                      Row(
-                        children: [
-                          const RatingStar(),
-                          const RatingStar(),
-                          const RatingStar(),
-                          const RatingStar(),
-                          const RatingStar(half: true),
-                          const SizedBox(width: AppSpacing.s4),
-                          Text(
-                            room.rating.toStringAsFixed(1),
-                            style: AppTypography.nunito(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.ink,
-                            ),
-                          ),
-                          const SizedBox(width: AppSpacing.s4),
-                          Text(
-                            '(${room.reviewCount})',
-                            style: AppTypography.quicksand(
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textFaint,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: AppSpacing.s4),
-                  child: Material(
-                    color: AppColors.primaryTint,
-                    shape: const CircleBorder(),
-                    child: InkWell(
-                      customBorder: const CircleBorder(),
-                      onTap: onChevronTap,
-                      child: SizedBox(
-                        width: 36,
-                        height: 36,
-                        child: Center(
-                          child: SvgPicture.string(_chevronGlyph, width: 14, height: 14),
+                          fontSize: 26,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.white,
                         ),
                       ),
                     ),
-                  ),
+                    const SizedBox(width: AppSpacing.s12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            room.name,
+                            style: AppTypography.nunito(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                              height: 1.25,
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.s4),
+                          Row(
+                            children: [
+                              Text(
+                                room.distanceLabel,
+                                style: AppTypography.quicksand(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.body,
+                                ),
+                              ),
+                              const SizedBox(width: AppSpacing.s8),
+                              Opacity(
+                                opacity: 0.4,
+                                child: Text(
+                                  '·',
+                                  style: AppTypography.quicksand(
+                                    fontSize: 12.5,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.body,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: AppSpacing.s8),
+                              Container(
+                                width: 7,
+                                height: 7,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: room.isOpen ? AppColors.secondary : AppColors.textFaint,
+                                  boxShadow: room.isOpen ? [
+                                    BoxShadow(
+                                      color: AppColors.secondary.withValues(alpha: 0.2),
+                                      spreadRadius: 3,
+                                    ),
+                                  ] : null,
+                                ),
+                              ),
+                              const SizedBox(width: 5),
+                              Text(
+                                room.isOpen ? 'Buka sekarang' : 'Tutup',
+                                style: AppTypography.quicksand(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w700,
+                                  color: room.isOpen ? AppColors.secondary : AppColors.body,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: AppSpacing.s4),
+                          Row(
+                            children: [
+                              for (int i = 1; i <= 5; i++)
+                                if (room.rating >= i)
+                                  const RatingStar()
+                                else if (room.rating >= i - 0.5)
+                                  const RatingStar(half: true)
+                                else
+                                  const RatingStar(half: false, empty: true),
+                              const SizedBox(width: AppSpacing.s4),
+                              Text(
+                                room.rating.toStringAsFixed(1),
+                                style: AppTypography.nunito(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.ink,
+                                ),
+                              ),
+                              const SizedBox(width: AppSpacing.s4),
+                              Text(
+                                '(${room.reviewCount})',
+                                style: AppTypography.quicksand(
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.textFaint,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: AppSpacing.s4),
+                      child: Material(
+                        color: AppColors.primaryTint,
+                        shape: const CircleBorder(),
+                        child: InkWell(
+                          customBorder: const CircleBorder(),
+                          onTap: onChevronTap,
+                          child: SizedBox(
+                            width: 36,
+                            height: 36,
+                            child: Center(
+                              child: SvgPicture.string(_chevronGlyph, width: 14, height: 14),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(AppSpacing.s16, AppSpacing.s14, AppSpacing.s16, 0),
+                child: Wrap(
+                  spacing: AppSpacing.s6,
+                  runSpacing: AppSpacing.s6,
+                  children: [for (final f in room.facilities) SheetFacilityTag(f)],
+                ),
+              ),
+            ],
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(AppSpacing.s16, AppSpacing.s14, AppSpacing.s16, 0),
-            child: Wrap(
-              spacing: AppSpacing.s6,
-              runSpacing: AppSpacing.s6,
-              children: [for (final f in room.facilities) SheetFacilityTag(f)],
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -349,7 +360,7 @@ class _NearbyRoomCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 156,
+      width: 180,
       padding: const EdgeInsets.all(AppSpacing.s12),
       decoration: BoxDecoration(
         color: AppColors.surfaceSand,
@@ -401,7 +412,13 @@ class _NearbyRoomCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.s6),
           Row(
             children: [
-              const RatingStar(size: 10),
+              for (int i = 1; i <= 5; i++)
+                if (room.rating >= i)
+                  const RatingStar(size: 10)
+                else if (room.rating >= i - 0.5)
+                  const RatingStar(size: 10, half: true)
+                else
+                  const RatingStar(size: 10, empty: true),
               const SizedBox(width: AppSpacing.s4),
               Text(
                 room.rating.toStringAsFixed(1),
@@ -416,16 +433,16 @@ class _NearbyRoomCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: AppColors.sageTint,
+                  color: room.isOpen ? AppColors.sageTint : AppColors.disabledFill,
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
-                  'BUKA',
+                  room.isOpen ? 'BUKA' : 'TUTUP',
                   style: AppTypography.quicksand(
                     fontSize: 9.5,
                     fontWeight: FontWeight.w700,
                     height: 1.2,
-                    color: AppColors.secondary,
+                    color: room.isOpen ? AppColors.sageDk : AppColors.body,
                   ),
                 ),
               ),

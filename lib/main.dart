@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'screens/home_map_screen.dart';
+import 'screens/root_shell.dart';
 import 'theme/app_theme.dart';
 
 void main() {
@@ -16,7 +16,7 @@ class MomSpaceApp extends StatelessWidget {
       title: 'MomSpace',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
-      home: const HomeMapScreen(),
+      home: const RootShell(),
     );
   }
 }

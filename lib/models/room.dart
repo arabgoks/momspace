@@ -1,3 +1,5 @@
+import 'package:maplibre_gl/maplibre_gl.dart';
+
 /// A lactation room listing, as surfaced in the Home/Map bottom sheet.
 /// Source: README.md § State Management › Home Map / Detail.
 class Room {
@@ -10,6 +12,7 @@ class Room {
     required this.isOpen,
     required this.rating,
     required this.reviewCount,
+    required this.position,
     this.facilities = const [],
   });
 
@@ -22,6 +25,7 @@ class Room {
   final double rating;
   final int reviewCount;
   final List<String> facilities;
+  final LatLng position;
 
   String get distanceLabel {
     if (distanceMeters < 1000) return '$distanceMeters m';

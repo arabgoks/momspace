@@ -1,3 +1,4 @@
+import 'package:maplibre_gl/maplibre_gl.dart';
 import '../models/room.dart';
 
 /// Sample data reproducing the exact figures from
@@ -11,7 +12,8 @@ const Room demoSelectedRoom = Room(
   isOpen: true,
   rating: 4.8,
   reviewCount: 124,
-  facilities: ['✓ Bersih', 'Kulkas', 'AC', 'Stroller'],
+  facilities: ['Bersih', 'Kulkas', 'AC', 'Stroller'],
+  position: LatLng(-6.19325, 106.82128),
 );
 
 const List<Room> demoNearbyRooms = [
@@ -24,6 +26,7 @@ const List<Room> demoNearbyRooms = [
     isOpen: true,
     rating: 4.8,
     reviewCount: 0,
+    position: LatLng(-6.19325, 106.82128),
   ),
   Room(
     id: 'grand-indonesia',
@@ -34,6 +37,7 @@ const List<Room> demoNearbyRooms = [
     isOpen: true,
     rating: 4.6,
     reviewCount: 0,
+    position: LatLng(-6.19510, 106.82089),
   ),
   Room(
     id: 'senayan-city',
@@ -44,6 +48,7 @@ const List<Room> demoNearbyRooms = [
     isOpen: true,
     rating: 4.7,
     reviewCount: 0,
+    position: LatLng(-6.22732, 106.79775),
   ),
   Room(
     id: 'pacific-place',
@@ -54,5 +59,28 @@ const List<Room> demoNearbyRooms = [
     isOpen: true,
     rating: 4.5,
     reviewCount: 0,
+    position: LatLng(-6.22447, 106.80998),
+  ),
+  Room(
+    id: 'wisma-bni46',
+    name: 'Wisma BNI 46',
+    avatarInitial: 'W',
+    floorLabel: 'Lt. 2',
+    distanceMeters: 1400,
+    isOpen: false,
+    rating: 4.2,
+    reviewCount: 0,
+    position: LatLng(-6.20235, 106.82098),
+  ),
+  Room(
+    id: 'sarinah',
+    name: 'Sarinah',
+    avatarInitial: 'S',
+    floorLabel: 'Lt. 3',
+    distanceMeters: 800,
+    isOpen: false,
+    rating: 4.9,
+    reviewCount: 0,
+    position: LatLng(-6.18680, 106.82362),
   ),
 ];
