@@ -46,3 +46,10 @@ app.*.map.json
 
 # Claude Code local session config and worktree checkouts
 .claude/
+
+# Vercel (dashboard/ has its own .gitignore for this too, but this repo is a
+# monorepo — guard the root in case `vercel` ever runs from here by mistake)
+.vercel
+.env
+.env.local
+.env*.local
