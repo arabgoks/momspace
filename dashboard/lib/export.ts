@@ -1,0 +1,25 @@
+/** Client-side CSV export — builds a Blob and triggers a real download. No backend involved. */
+export function downloadCSV(filename: string, rows: Record<string, string | number>[]): void {
+  if (rows.length === 0) return;
+
+  const headers = Object.keys(rows[0]);
+  const escapeCell = (value: string | number) => {
+    const str = String(value);
+    return /[",\n]/.test(str) ? `"${str.replace(/"/g, '""')}"` : str;
+  };
+  const csvLines = [
+    headers.join(','),
+    ...rows.map((row) => headers.map((h) => escapeCell(row[h])).join(',')),
+  ];
+  const csv = csvLines.join('\n');
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
