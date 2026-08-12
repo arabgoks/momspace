@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../models/room.dart';
-import '../theme/app_colors.dart';
-import '../theme/app_typography.dart';
-import '../widgets/nav/classic_pill_navbar.dart';
 import 'home_map_screen.dart';
+import 'profile_screen.dart';
+import 'search_screen.dart';
+import '../models/room.dart';
+import '../widgets/nav/classic_pill_navbar.dart';
 import '../widgets/report_hub_sheet.dart';
 
 class RootShell extends StatefulWidget {
@@ -41,9 +41,12 @@ class _RootShellState extends State<RootShell> {
           IndexedStack(
             index: stackIndex,
             children: [
-              HomeMapScreen(onRoomSelected: (room) => _selectedRoom = room),
-              const PlaceholderScreen(title: 'Pencarian'),
-              const PlaceholderScreen(title: 'Profil'),
+              HomeMapScreen(
+                onRoomSelected: (room) => _selectedRoom = room,
+                onSearchTap: () => setState(() => _activeTab = 1),
+              ),
+              const SearchScreen(),
+              const ProfileScreen(),
             ],
           ),
           Positioned(
@@ -56,30 +59,6 @@ class _RootShellState extends State<RootShell> {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class PlaceholderScreen extends StatelessWidget {
-  final String title;
-  const PlaceholderScreen({super.key, required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.surface,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(title, style: AppTypography.screenTitle),
-            const SizedBox(height: 16),
-            Text('Segera hadir', style: AppTypography.quicksand(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textFaint)),
-            const SizedBox(height: 32),
-            Icon(Icons.construction_rounded, size: 64, color: AppColors.primaryTint),
-          ],
-        ),
       ),
     );
   }
