@@ -4,8 +4,11 @@ import 'package:maplibre_gl/maplibre_gl.dart';
 import 'package:geolocator/geolocator.dart';
 
 import '../data/demo_rooms.dart';
+import '../data/repository.dart';
 import '../models/room.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_spacing.dart';
+import '../theme/app_typography.dart';
 import '../utils/map_marker_utils.dart';
 import '../widgets/home_map/floating_map_actions.dart';
 import '../widgets/home_map/map_pin.dart';
@@ -16,9 +19,10 @@ import '../widgets/home_map/warm_map_background.dart';
 import '../widgets/nav/classic_pill_navbar.dart';
 
 class HomeMapScreen extends StatefulWidget {
-  const HomeMapScreen({super.key, this.onRoomSelected});
+  const HomeMapScreen({super.key, this.onRoomSelected, this.onSearchTap});
 
   final ValueChanged<Room?>? onRoomSelected;
+  final VoidCallback? onSearchTap;
 
   @override
   State<HomeMapScreen> createState() => _HomeMapScreenState();
@@ -37,7 +41,7 @@ class _HomeMapScreenState extends State<HomeMapScreen> {
     if (_loadingSelection) return SheetVariant.loading;
     return _selectedRoomId == null ? SheetVariant.empty : SheetVariant.defaultRoom;
   }
-  
+
   Room? get _selectedRoom {
     if (_selectedRoomId == null) return null;
     if (demoSelectedRoom.id == _selectedRoomId) return demoSelectedRoom;
@@ -55,36 +59,36 @@ class _HomeMapScreenState extends State<HomeMapScreen> {
     _updateSymbols();
     widget.onRoomSelected?.call(_selectedRoom);
   }
-  
+
   Future<void> _loadMarkerImages() async {
     if (_mapController == null) return;
     try {
       final availablePng = await rasterizeWidget(const MapPin(state: PinState.available), context: context, logicalSize: const Size(28, 36));
       final selectedPng = await rasterizeWidget(const MapPin(state: PinState.selected), context: context, logicalSize: const Size(38, 48));
       final closedPng = await rasterizeWidget(const MapPin(state: PinState.closed), context: context, logicalSize: const Size(28, 36));
-      
+
       await _mapController!.addImage('pin-available', availablePng);
       await _mapController!.addImage('pin-selected', selectedPng);
       await _mapController!.addImage('pin-closed', closedPng);
-      
+
       _updateSymbols();
     } catch (e) {
       debugPrint("Error loading marker images: \$e");
     }
   }
-  
+
   void _updateSymbols() {
     if (_mapController == null || !_mapStyleLoaded) return;
     _mapController!.clearSymbols();
-    
+
     final rooms = [demoSelectedRoom, ...demoNearbyRooms];
-    
+
     for (var room in rooms) {
       String iconImage = room.isOpen ? 'pin-available' : 'pin-closed';
       if (_selectedRoomId == room.id) {
         iconImage = 'pin-selected';
       }
-      
+
       _mapController!.addSymbol(
         SymbolOptions(
           geometry: room.position,
@@ -114,7 +118,7 @@ class _HomeMapScreenState extends State<HomeMapScreen> {
         return;
       }
     }
-    
+
     if (permission == LocationPermission.deniedForever) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Izin lokasi ditolak permanen.')));
       return;
@@ -124,10 +128,53 @@ class _HomeMapScreenState extends State<HomeMapScreen> {
     setState(() {
       _userLocation = LatLng(position.latitude, position.longitude);
     });
-    
+
     _mapController?.animateCamera(CameraUpdate.newCameraPosition(
       CameraPosition(target: _userLocation!, zoom: 15, tilt: 35)
     ));
+  }
+
+  void _showLegend() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(
+          left: 16, right: 16, top: 16,
+          bottom: MediaQuery.paddingOf(context).bottom + 16,
+        ),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(AppRadius.cardLg),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Legenda Peta', style: AppTypography.nunito(fontSize: 16, fontWeight: FontWeight.w800)),
+              const SizedBox(height: 14),
+              _legendRow(AppColors.primary, 'Ruang laktasi tersedia'),
+              const SizedBox(height: 10),
+              _legendRow(AppColors.primaryPressed, 'Sedang dipilih'),
+              const SizedBox(height: 10),
+              _legendRow(AppColors.pinClosed, 'Tutup / tidak tersedia'),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _legendRow(Color color, String label) {
+    return Row(
+      children: [
+        Container(width: 14, height: 14, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+        const SizedBox(width: 10),
+        Text(label, style: AppTypography.quicksand(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.body)),
+      ],
+    );
   }
 
   @override
@@ -137,20 +184,18 @@ class _HomeMapScreenState extends State<HomeMapScreen> {
     final variant = _sheetVariant;
     final sheetHeight = RoomBottomSheet.heightFor(variant);
     final actionsBottom = sheetHeight + 98;
-    
+
     final room = _selectedRoom;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.dark.copyWith(
-        statusBarColor: Colors.transparent,
-      ),
+      value: SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.transparent),
       child: Scaffold(
         backgroundColor: AppColors.mapLand,
         body: Stack(
           children: [
-            if (_mapError || !_mapStyleLoaded) 
+            if (_mapError || !_mapStyleLoaded)
               const Positioned.fill(child: WarmMapBackground()),
-              
+
             Positioned.fill(
               child: MapLibreMap(
                 initialCameraPosition: const CameraPosition(
@@ -177,28 +222,23 @@ class _HomeMapScreenState extends State<HomeMapScreen> {
                 },
               ),
             ),
-            
-            if (_userLocation != null)
-              // We'd ideally render this as a symbol that moves, but for now we can
-              // place a UserLocationDot on the map using a custom MapLibre integration 
-              // or just rely on a symbol. Since we want an animating dot, an overlay 
-              // via a Symbol is tricky without a custom layer. We'll simplify and rely
-              // on maplibre myLocation if needed, or just let it animate over the center.
-              // To be exact to spec, it should be an animating symbol, but we can just use 
-              // the flutter widget positioned if we project coordinates, but that's complex.
-              // We'll skip complex projection for now and just rely on the map.
-              const SizedBox.shrink(),
-              
+
+            if (_userLocation != null) const SizedBox.shrink(),
+
             Positioned(
               top: searchTop,
               left: 14,
               right: 14,
-              child: const SearchPill(),
+              child: SearchPill(
+                onTap: widget.onSearchTap,
+                onFilterTap: widget.onSearchTap,
+              ),
             ),
             Positioned(
               right: 14,
               bottom: actionsBottom,
               child: FloatingMapActions(
+                onLayersTap: _showLegend,
                 onLocateTap: _locateUser,
               ),
             ),
@@ -206,10 +246,13 @@ class _HomeMapScreenState extends State<HomeMapScreen> {
               left: 0,
               right: 0,
               bottom: 88,
-              child: RoomBottomSheet(
-                variant: variant,
-                selectedRoom: room ?? demoSelectedRoom,
-                nearbyRooms: demoNearbyRooms,
+              child: ListenableBuilder(
+                listenable: RoomRepository.instance,
+                builder: (context, _) => RoomBottomSheet(
+                  variant: variant,
+                  selectedRoom: room ?? demoSelectedRoom,
+                  nearbyRooms: demoNearbyRooms,
+                ),
               ),
             ),
           ],
