@@ -76,7 +76,7 @@ export function GapTable() {
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
         <span style={{ fontFamily: 'var(--font-quicksand)', fontWeight: 600, fontSize: 11, color: G.body }}>
-          {expanded ? 'Seluruh kecamatan ditampilkan' : '9 kecamatan lain dengan Gap ≥ 50'}
+          {expanded ? 'Seluruh kecamatan ditampilkan' : '2 kecamatan lain dengan Gap ≥ 50'}
         </span>
         <button
           onClick={() => setExpanded((v) => !v)}

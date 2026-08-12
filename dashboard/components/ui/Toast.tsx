@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useCallback, useContext, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { G } from '@/lib/colors';
 
 interface ToastContextValue {
@@ -17,11 +17,15 @@ export function useToast(): ToastContextValue {
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [message, setMessage] = useState<string | null>(null);
+  const timer = useRef<ReturnType<typeof setTimeout>>();
 
   const showToast = useCallback((msg: string) => {
+    clearTimeout(timer.current);
     setMessage(msg);
-    setTimeout(() => setMessage(null), 3000);
+    timer.current = setTimeout(() => setMessage(null), 3000);
   }, []);
+
+  useEffect(() => () => clearTimeout(timer.current), []);
 
   return (
     <ToastContext.Provider value={{ showToast }}>

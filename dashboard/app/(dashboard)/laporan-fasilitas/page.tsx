@@ -2,11 +2,11 @@
 
 import { useMemo, useState } from 'react';
 import { G } from '@/lib/colors';
-import { ALL_PROBLEM_REPORTS } from '@/lib/data';
 import { downloadCSV } from '@/lib/export';
 import { TopBar } from '@/components/layout/TopBar';
 import { Panel } from '@/components/ui/Panel';
 import { useToast } from '@/components/ui/Toast';
+import { useReports } from '@/components/dashboard/ReportsContext';
 import { ProblemReportRow } from '@/components/dashboard/ProblemReportRow';
 import { ReportDetailModal } from '@/components/dashboard/ReportDetailModal';
 import type { ProblemReport } from '@/types/dashboard';
@@ -20,7 +20,7 @@ const TABS: { id: FilterTab; label: string }[] = [
 ];
 
 export default function LaporanFasilitasPage() {
-  const [reports, setReports] = useState<ProblemReport[]>(ALL_PROBLEM_REPORTS);
+  const { reports, resolveReport } = useReports();
   const [tab, setTab] = useState<FilterTab>('all');
   const [selected, setSelected] = useState<ProblemReport | null>(null);
   const { showToast } = useToast();
@@ -32,7 +32,7 @@ export default function LaporanFasilitasPage() {
 
   const handleResolve = () => {
     if (!selected) return;
-    setReports((prev) => prev.map((r) => (r.name === selected.name ? { ...r, status: 'resolved' } : r)));
+    resolveReport(selected);
     setSelected(null);
     showToast('Laporan ditandai selesai');
   };

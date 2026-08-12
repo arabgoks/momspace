@@ -61,7 +61,7 @@ export function SummaryRow() {
         label="Rata-rata rating fasilitas"
         trend="+0.2" trendTone="up"
       />
-      <SummaryCard icon={<IconAlert />} value="12" label="Kecamatan underserved (Gap >70)" trend="−3 vs. April" trendTone="up" />
+      <SummaryCard icon={<IconAlert />} value="4" label="Kecamatan underserved (Gap >70)" trend="−3 vs. April" trendTone="up" />
       <SummaryCard icon={<IconReport />} value="1.247" label="Laporan masuk bulan ini" trend="+18%" trendTone="up" />
     </div>
   );
