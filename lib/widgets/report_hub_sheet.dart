@@ -8,6 +8,7 @@ import '../theme/app_colors.dart';
 import '../theme/app_shadows.dart';
 import '../theme/app_spacing.dart';
 import '../theme/app_typography.dart';
+import 'nav/classic_pill_navbar.dart';
 
 void showReportHubSheet(BuildContext context, {Room? contextRoom}) {
   showModalBottomSheet(
@@ -49,109 +50,129 @@ class _ReportHubSheet extends StatelessWidget {
           ),
         ),
         Positioned(
-          bottom: 84, // Above navbar
           left: 0,
           right: 0,
-          child: Material(
-            color: Colors.transparent,
-            child: Container(
-              decoration: const BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(28),
-                  topRight: Radius.circular(28),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Color(0x383C281E), // rgba(60,40,30,0.22)
-                    offset: Offset(0, -22),
-                    blurRadius: 50,
-                  )
-                ],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const SizedBox(height: 14),
-                  Container(
-                    width: 44,
-                    height: 5,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE2D5C9),
-                      borderRadius: BorderRadius.circular(3),
+          bottom: 0,
+          // The card and the nav bar are siblings in one bottom-pinned
+          // column so the pair always reaches the true screen edge,
+          // matching design_handoff_momspace/report-hub.jsx (the sheet
+          // sits directly on top of a crisp, un-blurred navbar rather
+          // than floating above a fixed guess at its height).
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Material(
+                color: Colors.transparent,
+                child: Container(
+                  decoration: const BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(28),
+                      topRight: Radius.circular(28),
                     ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Color(0x383C281E), // rgba(60,40,30,0.22)
+                        offset: Offset(0, -22),
+                        blurRadius: 50,
+                      )
+                    ],
                   ),
-                  const SizedBox(height: 14),
-                  Text('Kontribusi Data', style: AppTypography.nunito(fontSize: 20, fontWeight: FontWeight.w900, letterSpacing: -0.3)),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Pilih jenis kontribusi yang ingin kamu berikan',
-                    style: AppTypography.quicksand(fontSize: 12.5, fontWeight: FontWeight.w600, color: AppColors.muted),
-                  ),
-                  const SizedBox(height: 24),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 18),
-                    child: _OptionCard(
-                      title: 'Laporkan Kondisi Ruang',
-                      subtitle: 'Bagikan kondisi terkini ruang laktasi yang baru kamu kunjungi',
-                      iconColor: AppColors.primaryPressed,
-                      iconBgColor: AppColors.primaryTint,
-                      iconData: Icons.fact_check_outlined,
-                      onTap: () {
-                        Navigator.pop(context);
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => ReportConditionScreen(room: contextRoom)),
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 18),
-                    child: _OptionCard(
-                      title: 'Tambah Lokasi Baru',
-                      subtitle: 'Usulkan ruang laktasi yang belum terdaftar di MomSpace',
-                      iconColor: AppColors.sageDk,
-                      iconBgColor: AppColors.sageTint,
-                      iconData: Icons.add_location_alt_outlined,
-                      onTap: () {
-                        Navigator.pop(context);
-                        Navigator.push(context, MaterialPageRoute(builder: (_) => const SubmitLocationScreen()));
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.star_rounded, color: AppColors.primary, size: 16),
-                      const SizedBox(width: 6),
-                      RichText(
-                        text: TextSpan(
-                          style: AppTypography.quicksand(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.ink),
-                          children: const [
-                            TextSpan(text: 'Setiap kontribusi memberi kamu '),
-                            TextSpan(text: '+10 poin reward', style: TextStyle(fontWeight: FontWeight.w700)),
-                          ],
+                      const SizedBox(height: 14),
+                      Container(
+                        width: 44,
+                        height: 5,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE2D5C9),
+                          borderRadius: BorderRadius.circular(3),
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      Text('Kontribusi Data', style: AppTypography.nunito(fontSize: 20, fontWeight: FontWeight.w900, letterSpacing: -0.3)),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Pilih jenis kontribusi yang ingin kamu berikan',
+                        style: AppTypography.quicksand(fontSize: 12.5, fontWeight: FontWeight.w600, color: AppColors.muted),
+                      ),
+                      const SizedBox(height: 24),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 18),
+                        child: _OptionCard(
+                          title: 'Laporkan Kondisi Ruang',
+                          subtitle: 'Bagikan kondisi terkini ruang laktasi yang baru kamu kunjungi',
+                          iconColor: AppColors.primaryPressed,
+                          iconBgColor: AppColors.primaryTint,
+                          iconData: Icons.fact_check_outlined,
+                          onTap: () {
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => ReportConditionScreen(room: contextRoom)),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 18),
+                        child: _OptionCard(
+                          title: 'Tambah Lokasi Baru',
+                          subtitle: 'Usulkan ruang laktasi yang belum terdaftar di MomSpace',
+                          iconColor: AppColors.sageDk,
+                          iconBgColor: AppColors.sageTint,
+                          iconData: Icons.add_location_alt_outlined,
+                          onTap: () {
+                            Navigator.pop(context);
+                            Navigator.push(context, MaterialPageRoute(builder: (_) => const SubmitLocationScreen()));
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.star_rounded, color: AppColors.primary, size: 16),
+                          const SizedBox(width: 6),
+                          RichText(
+                            text: TextSpan(
+                              style: AppTypography.quicksand(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.ink),
+                              children: const [
+                                TextSpan(text: 'Setiap kontribusi memberi kamu '),
+                                TextSpan(text: '+10 poin reward', style: TextStyle(fontWeight: FontWeight.w700)),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      const Divider(color: AppColors.divider, height: 1, indent: 24, endIndent: 24),
+                      InkWell(
+                        onTap: () => Navigator.pop(context),
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(vertical: 24),
+                          alignment: Alignment.center,
+                          child: Text('Batal', style: AppTypography.nunito(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textFaint)),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 24),
-                  const Divider(color: AppColors.divider, height: 1, indent: 24, endIndent: 24),
-                  InkWell(
-                    onTap: () => Navigator.pop(context),
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(vertical: 24),
-                      alignment: Alignment.center,
-                      child: Text('Batal', style: AppTypography.nunito(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textFaint)),
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
+              // Redrawn crisp (not blurred) so the sheet appears to sit on
+              // top of the real nav bar, per the design reference. The
+              // Report tab stays highlighted since that's what opened this
+              // sheet; tapping it here is a no-op rather than switching
+              // tabs behind the open modal.
+              ClassicPillNavBar(
+                activeIndex: 2,
+                onChanged: (_) {},
+              ),
+            ],
           ),
         ),
       ],
