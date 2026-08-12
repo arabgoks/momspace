@@ -26,6 +26,8 @@
 	<true/>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>MomSpace menggunakan lokasimu untuk menemukan ruang laktasi terdekat di sekitarmu.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>MomSpace membutuhkan akses galeri untuk melampirkan foto kondisi ruang laktasi.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

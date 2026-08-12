@@ -1,20 +1,70 @@
+import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../data/repository.dart';
 import '../models/room.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
 import '../theme/app_typography.dart';
 import '../widgets/home_map/rating_star.dart';
 
-class DetailScreen extends StatelessWidget {
+class DetailScreen extends StatefulWidget {
   const DetailScreen({super.key, required this.room});
 
   final Room room;
 
+  @override
+  State<DetailScreen> createState() => _DetailScreenState();
+}
+
+class _DetailScreenState extends State<DetailScreen> {
+  Timer? _ticker;
+
+  bool get _checkedIn => RoomRepository.instance.isCheckedIn(widget.room.id);
+
+  @override
+  void initState() {
+    super.initState();
+    if (_checkedIn) _startTicker();
+  }
+
+  @override
+  void dispose() {
+    _ticker?.cancel();
+    super.dispose();
+  }
+
+  void _startTicker() {
+    _ticker?.cancel();
+    _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (!mounted) return;
+      if (!_checkedIn) _ticker?.cancel();
+      setState(() {});
+    });
+  }
+
+  void _toggleCheckIn() {
+    if (_checkedIn) {
+      RoomRepository.instance.checkOut(widget.room.id);
+      _ticker?.cancel();
+    } else {
+      RoomRepository.instance.checkIn(widget.room.id);
+      _startTicker();
+    }
+    setState(() {});
+  }
+
+  String _formatRemaining(Duration d) {
+    final m = d.inMinutes.toString().padLeft(2, '0');
+    final s = (d.inSeconds % 60).toString().padLeft(2, '0');
+    return '$m:$s';
+  }
+
   Future<void> _launchMaps() async {
-    final uri = Uri.parse('geo:\${room.position.latitude},\${room.position.longitude}?q=\${room.position.latitude},\${room.position.longitude}(\${Uri.encodeComponent(room.name)})');
+    final room = widget.room;
+    final uri = Uri.parse('geo:${room.position.latitude},${room.position.longitude}?q=${room.position.latitude},${room.position.longitude}(${Uri.encodeComponent(room.name)})');
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri);
     }
@@ -22,26 +72,24 @@ class DetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final room = widget.room;
     return Scaffold(
       backgroundColor: AppColors.surface,
       body: Stack(
         children: [
-          // Content
           Positioned.fill(
             child: ListView(
               padding: const EdgeInsets.only(top: 112, bottom: 160),
               children: [
-                _buildPhoto(),
-                _buildInfoCard(),
-                _buildRatingRow(),
-                _buildFacilities(),
+                _buildPhoto(room),
+                _buildInfoCard(room),
+                _buildRatingRow(room),
+                _buildFacilities(room),
                 _buildLatestCondition(),
                 _buildReviews(),
               ],
             ),
           ),
-          
-          // Header
           Positioned(
             top: 0,
             left: 0,
@@ -53,7 +101,7 @@ class DetailScreen extends StatelessWidget {
                   height: 112,
                   padding: EdgeInsets.only(top: MediaQuery.paddingOf(context).top, bottom: 8),
                   decoration: const BoxDecoration(
-                    color: Color(0xEBEBEBEB), // rgba(255,255,255,0.92) approximate
+                    color: Color(0xEBEBEBEB),
                     border: Border(bottom: BorderSide(color: AppColors.divider)),
                   ),
                   child: Row(
@@ -75,8 +123,6 @@ class DetailScreen extends StatelessWidget {
               ),
             ),
           ),
-
-          // Action bar
           Positioned(
             bottom: 0,
             left: 0,
@@ -91,18 +137,40 @@ class DetailScreen extends StatelessWidget {
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: () {},
+                      onPressed: room.isOpen ? _toggleCheckIn : null,
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 14),
-                        side: const BorderSide(color: AppColors.primary, width: 2),
+                        side: BorderSide(
+                          color: !room.isOpen
+                              ? AppColors.disabledFill
+                              : (_checkedIn ? AppColors.secondary : AppColors.primary),
+                          width: 2,
+                        ),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.camera_alt_outlined, color: AppColors.primaryPressed, size: 20),
+                          Icon(
+                            _checkedIn ? Icons.logout_rounded : Icons.camera_alt_outlined,
+                            color: !room.isOpen
+                                ? AppColors.textFaint
+                                : (_checkedIn ? AppColors.sageDk : AppColors.primaryPressed),
+                            size: 20,
+                          ),
                           const SizedBox(width: 8),
-                          Text('Check-In', style: AppTypography.nunito(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.primaryPressed)),
+                          Text(
+                            _checkedIn
+                                ? 'Check-Out · ${_formatRemaining(RoomRepository.instance.checkInRemaining(room.id) ?? Duration.zero)}'
+                                : 'Check-In',
+                            style: AppTypography.nunito(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w800,
+                              color: !room.isOpen
+                                  ? AppColors.textFaint
+                                  : (_checkedIn ? AppColors.sageDk : AppColors.primaryPressed),
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -113,7 +181,7 @@ class DetailScreen extends StatelessWidget {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(24),
                         boxShadow: room.isOpen ? [
-                          const BoxShadow(color: Color(0x6BD88B7C), offset: Offset(0, 10), blurRadius: 22) // Glow
+                          const BoxShadow(color: Color(0x6BD88B7C), offset: Offset(0, 10), blurRadius: 22)
                         ] : [],
                         gradient: room.isOpen ? const LinearGradient(
                           colors: [AppColors.primary, AppColors.primaryPressed],
@@ -156,49 +224,44 @@ class DetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPhoto() {
+  Widget _buildPhoto(Room room) {
+    final checkedIn = _checkedIn;
     return Container(
       height: 220,
       width: double.infinity,
       color: AppColors.surfaceSand,
       child: Stack(
         children: [
-          // Simulated illustration
-          Positioned.fill(
-            child: CustomPaint(
-              painter: _IllustrationPainter(),
-            ),
-          ),
+          Positioned.fill(child: CustomPaint(painter: _IllustrationPainter())),
           if (!room.isOpen)
-            Positioned.fill(
-              child: Container(color: const Color(0x523C3727)), // Dark overlay
-            ),
+            Positioned.fill(child: Container(color: const Color(0x523C3727))),
           Positioned(
             left: 16,
             bottom: 16,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(999),
-              ),
+              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(999)),
               child: Row(
                 children: [
                   Container(
                     width: 8,
                     height: 8,
                     decoration: BoxDecoration(
-                      color: room.isOpen ? AppColors.secondary : AppColors.textFaint,
+                      color: !room.isOpen
+                          ? AppColors.textFaint
+                          : (checkedIn ? AppColors.primaryPressed : AppColors.secondary),
                       shape: BoxShape.circle,
                     ),
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    room.isOpen ? 'Buka sekarang' : 'Tutup',
+                    !room.isOpen ? 'Tutup' : (checkedIn ? 'Sedang digunakan' : 'Buka sekarang'),
                     style: AppTypography.quicksand(
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
-                      color: room.isOpen ? AppColors.secondary : AppColors.body,
+                      color: !room.isOpen
+                          ? AppColors.body
+                          : (checkedIn ? AppColors.primaryPressed : AppColors.secondary),
                     ),
                   )
                 ],
@@ -231,7 +294,7 @@ class DetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoCard() {
+  Widget _buildInfoCard(Room room) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(18, 20, 18, 4),
       child: Column(
@@ -239,9 +302,9 @@ class DetailScreen extends StatelessWidget {
         children: [
           Text(room.name, style: AppTypography.nunito(fontSize: 22, fontWeight: FontWeight.w800, letterSpacing: -0.3)),
           const SizedBox(height: 12),
-          _InfoRow(icon: Icons.location_on, text: 'Jl. M.H. Thamrin No.28–30, Jakarta Pusat'), // Hardcoded demo
+          _InfoRow(icon: Icons.location_on, text: 'Jl. M.H. Thamrin No.28–30, Jakarta Pusat'),
           const SizedBox(height: 8),
-          _InfoRow(icon: Icons.directions_walk, text: '\${room.distanceLabel} dari lokasimu'),
+          _InfoRow(icon: Icons.directions_walk, text: '${room.distanceLabel} dari lokasimu'),
           const SizedBox(height: 8),
           Row(
             children: [
@@ -266,15 +329,12 @@ class DetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildRatingRow() {
+  Widget _buildRatingRow(Room room) {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Container(
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppColors.surfaceSand,
-          borderRadius: BorderRadius.circular(16),
-        ),
+        decoration: BoxDecoration(color: AppColors.surfaceSand, borderRadius: BorderRadius.circular(16)),
         child: Row(
           children: [
             for (int i = 1; i <= 5; i++)
@@ -287,7 +347,7 @@ class DetailScreen extends StatelessWidget {
             const SizedBox(width: 8),
             Text(room.rating.toStringAsFixed(1), style: AppTypography.nunito(fontSize: 15, fontWeight: FontWeight.w800)),
             const SizedBox(width: 8),
-            Text('\${room.reviewCount} ulasan', style: AppTypography.quicksand(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textFaint)),
+            Text('${room.reviewCount} ulasan', style: AppTypography.quicksand(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textFaint)),
             const Spacer(),
             Text('Lihat semua', style: AppTypography.quicksand(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.primaryPressed)),
             const SizedBox(width: 4),
@@ -298,10 +358,8 @@ class DetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildFacilities() {
-    // List of facilities based on spec
+  Widget _buildFacilities(Room room) {
     final allFacilities = ['Bersih', 'Kulkas', 'AC', 'Stroller', 'Wastafel', 'Stopkontak', 'Privasi'];
-    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -319,9 +377,7 @@ class DetailScreen extends StatelessWidget {
             itemBuilder: (context, index) {
               final fac = allFacilities[index];
               final isAvailable = room.facilities.contains(fac);
-              // Spec: Closed state marks Kulkas and Stopkontak unavailable
               final isForceUnavailable = !room.isOpen && (fac == 'Kulkas' || fac == 'Stopkontak');
-              
               if (isForceUnavailable) {
                 return _FacilityTag(label: fac, state: _FacilityState.unavailable);
               } else if (isAvailable) {
@@ -346,10 +402,7 @@ class DetailScreen extends StatelessWidget {
           const SizedBox(height: 12),
           Container(
             padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.surfaceSand,
-              borderRadius: BorderRadius.circular(16),
-            ),
+            decoration: BoxDecoration(color: AppColors.surfaceSand, borderRadius: BorderRadius.circular(16)),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -358,10 +411,7 @@ class DetailScreen extends StatelessWidget {
                     Container(
                       width: 36,
                       height: 36,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: AppColors.primary,
-                      ),
+                      decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.primary),
                       alignment: Alignment.center,
                       child: Text('R', style: AppTypography.nunito(fontSize: 20, color: Colors.white, fontWeight: FontWeight.w800)),
                     ),
@@ -415,10 +465,7 @@ class DetailScreen extends StatelessWidget {
           const SizedBox(height: 12),
           Container(
             padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.surfaceSand,
-              borderRadius: BorderRadius.circular(16),
-            ),
+            decoration: BoxDecoration(color: AppColors.surfaceSand, borderRadius: BorderRadius.circular(16)),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -509,7 +556,6 @@ class _FacilityTag extends StatelessWidget {
   Widget build(BuildContext context) {
     Color bg, border, text;
     IconData icon;
-    
     switch (state) {
       case _FacilityState.available:
         bg = AppColors.sageTint;
@@ -545,11 +591,8 @@ class _FacilityTag extends StatelessWidget {
           const SizedBox(width: 6),
           Text(
             label,
-            style: AppTypography.quicksand(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              color: text,
-            ).copyWith(decoration: state == _FacilityState.unavailable ? TextDecoration.lineThrough : null),
+            style: AppTypography.quicksand(fontSize: 12, fontWeight: FontWeight.w700, color: text)
+                .copyWith(decoration: state == _FacilityState.unavailable ? TextDecoration.lineThrough : null),
           ),
         ],
       ),
@@ -587,7 +630,6 @@ class _IllustrationPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final bgPaint = Paint()..shader = const LinearGradient(colors: [Color(0xFFFBF6F1), Color(0xFFF2C6B8)]).createShader(Offset.zero & size);
     canvas.drawRect(Offset.zero & size, bgPaint);
-    // Draw some simple shapes to simulate the illustration
     final chairPaint = Paint()..color = AppColors.primaryPressed;
     canvas.drawRRect(RRect.fromRectAndRadius(Rect.fromLTWH(size.width / 2 - 40, size.height - 100, 80, 80), const Radius.circular(16)), chairPaint);
   }
