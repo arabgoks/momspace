@@ -65,6 +65,7 @@ flutter:
 
   assets:
     - assets/map_style_momspace.json
+    - assets/images/rooms/
 
   fonts:
     - family: Nunito

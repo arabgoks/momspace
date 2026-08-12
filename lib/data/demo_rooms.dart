@@ -14,6 +14,10 @@ const Room demoSelectedRoom = Room(
   reviewCount: 124,
   facilities: ['Bersih', 'Kulkas', 'AC', 'Stroller'],
   position: LatLng(-6.19325, 106.82128),
+  photos: [
+    'assets/images/rooms/plaza-indonesia-1.jpg',
+    'assets/images/rooms/plaza-indonesia-2.jpeg',
+  ],
 );
 
 const List<Room> demoNearbyRooms = [

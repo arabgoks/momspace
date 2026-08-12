@@ -9,6 +9,7 @@ import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
 import '../theme/app_typography.dart';
 import '../widgets/home_map/rating_star.dart';
+import 'photo_viewer_screen.dart';
 
 class DetailScreen extends StatefulWidget {
   const DetailScreen({super.key, required this.room});
@@ -21,6 +22,8 @@ class DetailScreen extends StatefulWidget {
 
 class _DetailScreenState extends State<DetailScreen> {
   Timer? _ticker;
+  final PageController _photoController = PageController();
+  int _photoPageIndex = 0;
 
   bool get _checkedIn => RoomRepository.instance.isCheckedIn(widget.room.id);
 
@@ -33,7 +36,17 @@ class _DetailScreenState extends State<DetailScreen> {
   @override
   void dispose() {
     _ticker?.cancel();
+    _photoController.dispose();
     super.dispose();
+  }
+
+  void _openPhotoViewer(Room room) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => PhotoViewerScreen(photos: room.photos, initialIndex: _photoPageIndex),
+      ),
+    );
   }
 
   void _startTicker() {
@@ -226,13 +239,27 @@ class _DetailScreenState extends State<DetailScreen> {
 
   Widget _buildPhoto(Room room) {
     final checkedIn = _checkedIn;
+    final hasPhotos = room.photos.isNotEmpty;
     return Container(
       height: 220,
       width: double.infinity,
       color: AppColors.surfaceSand,
       child: Stack(
         children: [
-          Positioned.fill(child: CustomPaint(painter: _IllustrationPainter())),
+          if (hasPhotos)
+            Positioned.fill(
+              child: GestureDetector(
+                onTap: () => _openPhotoViewer(room),
+                child: PageView.builder(
+                  controller: _photoController,
+                  itemCount: room.photos.length,
+                  onPageChanged: (i) => setState(() => _photoPageIndex = i),
+                  itemBuilder: (context, i) => Image.asset(room.photos[i], fit: BoxFit.cover),
+                ),
+              ),
+            )
+          else
+            Positioned.fill(child: CustomPaint(painter: _IllustrationPainter())),
           if (!room.isOpen)
             Positioned.fill(child: Container(color: const Color(0x523C3727))),
           Positioned(
@@ -268,27 +295,31 @@ class _DetailScreenState extends State<DetailScreen> {
               ),
             ),
           ),
-          Positioned(
-            right: 16,
-            bottom: 16,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(999),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  color: const Color(0xA6333727),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.camera_alt, color: Colors.white, size: 14),
-                      const SizedBox(width: 4),
-                      Text('1 / 4', style: AppTypography.quicksand(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white)),
-                    ],
+          if (hasPhotos)
+            Positioned(
+              right: 16,
+              bottom: 16,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(999),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    color: const Color(0xA6333727),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.camera_alt, color: Colors.white, size: 14),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${_photoPageIndex + 1} / ${room.photos.length}',
+                          style: AppTypography.quicksand(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
         ],
       ),
     );

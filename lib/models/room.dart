@@ -14,6 +14,7 @@ class Room {
     required this.reviewCount,
     required this.position,
     this.facilities = const [],
+    this.photos = const [],
   });
 
   final String id;
@@ -26,6 +27,11 @@ class Room {
   final int reviewCount;
   final List<String> facilities;
   final LatLng position;
+
+  /// Asset paths for real facility photos, e.g. `assets/images/rooms/...`.
+  /// Empty for rooms with no field-survey photos yet, in which case the
+  /// detail screen falls back to a placeholder illustration.
+  final List<String> photos;
 
   String get distanceLabel {
     if (distanceMeters < 1000) return '$distanceMeters m';
