@@ -330,8 +330,14 @@ class SheetEmpty extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text('Ruang laktasi terdekat', style: AppTypography.sectionTitle()),
-                GestureDetector(
-                  onTap: onSeeAllTap,
+                TextButton(
+                  onPressed: onSeeAllTap,
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    foregroundColor: AppColors.primaryPressed,
+                  ),
                   child: Text(
                     'Lihat semua',
                     style: AppTypography.quicksand(

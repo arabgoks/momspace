@@ -29,56 +29,57 @@ class SearchPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
+    return Container(
+      decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(25),
-        onTap: onTap,
-        child: Container(
-          height: 50,
-          padding: const EdgeInsets.fromLTRB(18, 0, 8, 0),
-          decoration: BoxDecoration(
-            color: AppColors.primaryTint,
-            borderRadius: BorderRadius.circular(25),
-            border: Border.all(
-              color: AppColors.primary.withValues(alpha: 0.25),
-            ),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x1A3C281E), // rgba(60,40,30,0.10)
-                offset: Offset(0, 10),
-                blurRadius: 24,
-              ),
-              BoxShadow(
-                color: Color(0x0A3C281E), // rgba(60,40,30,0.04)
-                offset: Offset(0, 1),
-                blurRadius: 2,
-              ),
-            ],
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x1A3C281E), // rgba(60,40,30,0.10)
+            offset: Offset(0, 10),
+            blurRadius: 24,
           ),
-          child: Row(
-            children: [
-              SvgPicture.string(_searchGlyph, width: 18, height: 18),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  'Cari ruang laktasi terdekat...',
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTypography.quicksand(
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFFA68A82),
+          BoxShadow(
+            color: Color(0x0A3C281E), // rgba(60,40,30,0.04)
+            offset: Offset(0, 1),
+            blurRadius: 2,
+          ),
+        ],
+      ),
+      child: Material(
+        color: AppColors.primaryTint,
+        borderRadius: BorderRadius.circular(25),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(25),
+          onTap: onTap,
+          child: Container(
+            height: 50,
+            padding: const EdgeInsets.fromLTRB(18, 0, 8, 0),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(25),
+              border: Border.all(
+                color: AppColors.primary.withValues(alpha: 0.25),
+              ),
+            ),
+            child: Row(
+              children: [
+                SvgPicture.string(_searchGlyph, width: 18, height: 18),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Cari ruang laktasi terdekat...',
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.quicksand(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFFA68A82),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 10),
-              GestureDetector(
-                onTap: onFilterTap,
-                child: Container(
+                const SizedBox(width: 10),
+                Container(
                   width: 38,
                   height: 38,
                   decoration: const BoxDecoration(
-                    color: Colors.white,
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
@@ -88,10 +89,20 @@ class SearchPill extends StatelessWidget {
                       ),
                     ],
                   ),
-                  child: SvgPicture.string(_filterGlyph, width: 18, height: 18),
+                  child: Material(
+                    color: Colors.white,
+                    shape: const CircleBorder(),
+                    child: InkWell(
+                      customBorder: const CircleBorder(),
+                      onTap: onFilterTap,
+                      child: Center(
+                        child: SvgPicture.string(_filterGlyph, width: 18, height: 18),
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

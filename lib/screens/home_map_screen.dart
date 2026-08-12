@@ -10,6 +10,9 @@ import '../widgets/home_map/search_pill.dart';
 import '../widgets/home_map/user_location_dot.dart';
 import '../widgets/home_map/warm_map_background.dart';
 import '../widgets/nav/classic_pill_navbar.dart';
+import '../widgets/home_map/mock_filter_sheet.dart';
+import '../widgets/ui/app_snackbar.dart';
+import 'mock_search_screen.dart';
 
 /// Fixed decorative pin layout, copied verbatim from home-map.jsx `MapWorld`.
 /// (x%, y%) are percentages of the full screen; the schematic map itself
@@ -89,12 +92,35 @@ class _HomeMapScreenState extends State<HomeMapScreen> {
               top: searchTop,
               left: 14,
               right: 14,
-              child: const SearchPill(),
+              child: Hero(
+                tag: 'search_bar_hero',
+                child: Material(
+                  type: MaterialType.transparency,
+                  child: SearchPill(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        PageRouteBuilder(
+                          pageBuilder: (context, anim1, anim2) => const MockSearchScreen(),
+                          transitionsBuilder: (context, anim1, anim2, child) {
+                            return FadeTransition(opacity: anim1, child: child);
+                          },
+                          transitionDuration: const Duration(milliseconds: 300),
+                        ),
+                      );
+                    },
+                    onFilterTap: () => MockFilterSheet.show(context),
+                  ),
+                ),
+              ),
             ),
             Positioned(
               right: 14,
               bottom: actionsBottom,
-              child: const FloatingMapActions(),
+              child: FloatingMapActions(
+                onLayersTap: () => AppSnackBar.show(context, 'Pilihan layer peta akan segera hadir', icon: Icons.layers_outlined),
+                onLocateTap: () => AppSnackBar.show(context, 'Mencari lokasi Anda...', icon: Icons.my_location),
+              ),
             ),
             Positioned(
               left: 0,
@@ -104,6 +130,8 @@ class _HomeMapScreenState extends State<HomeMapScreen> {
                 variant: variant,
                 selectedRoom: demoSelectedRoom,
                 nearbyRooms: demoNearbyRooms,
+                onChevronTap: () => AppSnackBar.show(context, 'Detail ruang akan segera hadir', icon: Icons.open_in_new),
+                onSeeAllTap: () => AppSnackBar.show(context, 'Menampilkan semua ruang terdekat...', icon: Icons.list),
               ),
             ),
             Positioned(
