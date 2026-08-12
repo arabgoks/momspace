@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../data/repository.dart';
+import '../models/condition_report.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
 import '../widgets/home_map/rating_star.dart';
@@ -19,17 +20,22 @@ class _ReportConditionScreenState extends State<ReportConditionScreen> {
 
   final List<String> _conditions = ['Bersih', 'Wastafel berfungsi', 'AC dingin', 'Sabun habis', 'Kotor', 'Ruang penuh'];
 
-  void _submit() {
+  Future<void> _submit() async {
     if (_rating == 0) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Mohon berikan rating (bintang).')));
       return;
     }
-    RoomRepository.instance.addReport({
-      'rating': _rating,
-      'conditions': _selectedConditions,
-      'note': _noteController.text,
-      'timestamp': DateTime.now().toIso8601String(),
-    });
+    await RoomRepository.instance.addReport(
+      ConditionReport(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        roomId: 'unknown',
+        roomName: 'Unknown',
+        conditions: _selectedConditions,
+        notes: _noteController.text,
+        timestamp: DateTime.now(),
+      ),
+    );
+    if (!mounted) return;
     Navigator.pop(context);
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Laporan berhasil dikirim. Terima kasih! (+10 poin)')),

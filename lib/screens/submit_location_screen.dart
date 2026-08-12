@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../data/repository.dart';
+import '../models/location_submission.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
 
@@ -18,17 +19,24 @@ class _SubmitLocationScreenState extends State<SubmitLocationScreen> {
   
   final List<String> _facilities = ['Bersih', 'Wastafel', 'AC', 'Kulkas', 'Stopkontak', 'Privasi', 'Stroller'];
 
-  void _submit() {
+  Future<void> _submit() async {
     if (_nameController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Nama tempat wajib diisi.')));
       return;
     }
-    RoomRepository.instance.addSubmission({
-      'name': _nameController.text,
-      'floor': _floorController.text,
-      'facilities': _selectedFacilities,
-      'timestamp': DateTime.now().toIso8601String(),
-    });
+    await RoomRepository.instance.addSubmission(
+      LocationSubmission(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        name: _nameController.text,
+        address: _floorController.text,
+        latitude: 0,
+        longitude: 0,
+        category: 'Lainnya',
+        facilities: _selectedFacilities,
+        timestamp: DateTime.now(),
+      ),
+    );
+    if (!mounted) return;
     Navigator.pop(context);
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Lokasi berhasil diusulkan. Terima kasih!')),

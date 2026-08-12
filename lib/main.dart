@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 
+import 'data/repository.dart';
 import 'screens/root_shell.dart';
 import 'theme/app_theme.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await RoomRepository.instance.init();
   runApp(const MomSpaceApp());
 }
 
