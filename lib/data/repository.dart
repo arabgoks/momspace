@@ -90,4 +90,35 @@ class RoomRepository extends ChangeNotifier {
   Future<void> _persistPoints() async {
     await _prefs?.setInt(_pointsKey, _rewardPoints);
   }
+
+  final Map<String, DateTime> _checkIns = {};
+
+  /// Not persisted to SharedPreferences — occupancy is transient/live
+  /// (unlike reports/submissions/points), so it resets every app run.
+  bool isCheckedIn(String roomId) {
+    final expiry = _checkIns[roomId];
+    if (expiry == null) return false;
+    if (DateTime.now().isAfter(expiry)) {
+      _checkIns.remove(roomId);
+      return false;
+    }
+    return true;
+  }
+
+  Duration? checkInRemaining(String roomId) {
+    final expiry = _checkIns[roomId];
+    if (expiry == null) return null;
+    final remaining = expiry.difference(DateTime.now());
+    return remaining.isNegative ? null : remaining;
+  }
+
+  void checkIn(String roomId) {
+    _checkIns[roomId] = DateTime.now().add(const Duration(minutes: 30));
+    notifyListeners();
+  }
+
+  void checkOut(String roomId) {
+    _checkIns.remove(roomId);
+    notifyListeners();
+  }
 }
