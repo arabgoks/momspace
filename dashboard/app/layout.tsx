@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Nunito, Quicksand, JetBrains_Mono } from 'next/font/google';
+import { ToastProvider } from '@/components/ui/Toast';
 import './globals.css';
 
 const nunito = Nunito({
@@ -28,7 +29,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="id" className={`${nunito.variable} ${quicksand.variable} ${jetbrainsMono.variable}`}>
-      <body>{children}</body>
+      <body>
+        <ToastProvider>{children}</ToastProvider>
+      </body>
     </html>
   );
 }
