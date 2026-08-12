@@ -16,7 +16,9 @@ import '../widgets/home_map/warm_map_background.dart';
 import '../widgets/nav/classic_pill_navbar.dart';
 
 class HomeMapScreen extends StatefulWidget {
-  const HomeMapScreen({super.key});
+  const HomeMapScreen({super.key, this.onRoomSelected});
+
+  final ValueChanged<Room?>? onRoomSelected;
 
   @override
   State<HomeMapScreen> createState() => _HomeMapScreenState();
@@ -51,6 +53,7 @@ class _HomeMapScreenState extends State<HomeMapScreen> {
       _loadingSelection = false;
     });
     _updateSymbols();
+    widget.onRoomSelected?.call(_selectedRoom);
   }
   
   Future<void> _loadMarkerImages() async {

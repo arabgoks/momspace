@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 
+import '../models/room.dart';
 import '../screens/report_condition_screen.dart';
 import '../screens/submit_location_screen.dart';
 import '../theme/app_colors.dart';
@@ -8,18 +9,20 @@ import '../theme/app_shadows.dart';
 import '../theme/app_spacing.dart';
 import '../theme/app_typography.dart';
 
-void showReportHubSheet(BuildContext context) {
+void showReportHubSheet(BuildContext context, {Room? contextRoom}) {
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
     barrierColor: Colors.transparent,
-    builder: (context) => const _ReportHubSheet(),
+    builder: (context) => _ReportHubSheet(contextRoom: contextRoom),
   );
 }
 
 class _ReportHubSheet extends StatelessWidget {
-  const _ReportHubSheet();
+  const _ReportHubSheet({this.contextRoom});
+
+  final Room? contextRoom;
 
   @override
   Widget build(BuildContext context) {
@@ -96,7 +99,10 @@ class _ReportHubSheet extends StatelessWidget {
                       iconData: Icons.fact_check_outlined,
                       onTap: () {
                         Navigator.pop(context);
-                        Navigator.push(context, MaterialPageRoute(builder: (_) => const ReportConditionScreen()));
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => ReportConditionScreen(room: contextRoom)),
+                        );
                       },
                     ),
                   ),

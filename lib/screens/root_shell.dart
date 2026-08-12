@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../models/room.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
 import '../widgets/nav/classic_pill_navbar.dart';
@@ -15,11 +16,13 @@ class RootShell extends StatefulWidget {
 
 class _RootShellState extends State<RootShell> {
   int _activeTab = 0;
+  Room? _selectedRoom;
 
   void _onTabChanged(int index) {
     if (index == 2) {
-      // Report tab opens bottom sheet
-      showReportHubSheet(context);
+      // Report tab opens bottom sheet, pre-filled with the currently
+      // selected map room if there is one.
+      showReportHubSheet(context, contextRoom: _selectedRoom);
     } else {
       setState(() => _activeTab = index);
     }
@@ -37,10 +40,10 @@ class _RootShellState extends State<RootShell> {
         children: [
           IndexedStack(
             index: stackIndex,
-            children: const [
-              HomeMapScreen(),
-              PlaceholderScreen(title: 'Pencarian'),
-              PlaceholderScreen(title: 'Profil'),
+            children: [
+              HomeMapScreen(onRoomSelected: (room) => _selectedRoom = room),
+              const PlaceholderScreen(title: 'Pencarian'),
+              const PlaceholderScreen(title: 'Profil'),
             ],
           ),
           Positioned(
